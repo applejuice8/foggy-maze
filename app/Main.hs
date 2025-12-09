@@ -2,13 +2,12 @@
 
 module Main where
 
-import qualified Web.Scotty
+import Web.Scotty ( get, html, scotty, ActionM )
+import Data.Text.Lazy (Text)
 
-greet :: Web.Scotty.ActionM ()
-greet = Web.Scotty.html "<h1>Hello, adam</h1>"
+greet :: Text
+greet = "<h1>Hello, adam</h1>"
 
 main :: IO ()
-main = do
-    Web.Scotty.scotty 3000 $ do
-        Web.Scotty.get "/" $ do
-            greet
+main = scotty 3000 $ do
+    get "/" $ html greet

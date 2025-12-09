@@ -1,0 +1,35 @@
+Mini Stock Portfolio Simulator
+- Users can track a portfolio of mock stocks
+
+Features
+- Buy / Sell stocks
+- Display current portfolio
+- Show purchase / sell history
+
+Tech Stack
+- Haskell
+- Scotty
+- HTML
+- Lucid (Maybe)
+
+Endpoints
+- Buy / Sell (HTML button)
+- View current portfolio (Gain / Loss amount)
+- Get all past transactions (Display in a table)
+
+Custom Data Types:
+- Stock
+- Transaction
+- Buy / Sell (Bool)
+
+SQLite Tables
+1. Stock
+    - Stock code (String length <= 5) (AAPL)
+    - Stock name (String) (Apple)
+
+2. Transactions
+    - Stock (Foreign Key)
+    - Buy / Sell (Bool)
+    - Stock price (Double)
+    - Tax (Double)
+
