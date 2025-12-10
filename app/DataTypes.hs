@@ -1,3 +1,5 @@
+module DataTypes where
+
 data Stock = Stock
     { stockCode :: String,
     , stockName :: String

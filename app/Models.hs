@@ -1,8 +1,18 @@
+module Models where
+
 import Database.SQLite.Simple
+import Models (Stock)
+
+connectDB :: IO Connection
+connectDB = open "stocks.db"
+
+insertStock :: Connection -> Stock -> IO ()
+insertStock conn stock =
+    execute_ conn "INSERT INTO stock (code, name) VALUES (?, ?)" stock
 
 main :: IO ()
 main = do
-    conn <- open "stock_db.db"
+    conn <- connectDB
 
     -- Create tables
     execute_ conn "CREATE TABLE IF NOT EXISTS stock (\
@@ -17,3 +27,8 @@ main = do
                     \tax REAL,\
                     \FOREIGN KEY(stock) REFERENCES stock(code)\
                 \)"
+    
+    -- Insert stock
+    insertStock conn (Stock "AAPL" "Apple")
+
+    close conn
