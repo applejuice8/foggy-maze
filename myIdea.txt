@@ -10,7 +10,8 @@ Tech Stack
 - Haskell
 - Scotty
 - HTML
-- Lucid (Maybe)
+- Lucid
+- SQLite
 
 Endpoints
 - Buy / Sell (HTML button)
