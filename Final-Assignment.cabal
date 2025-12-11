@@ -69,10 +69,6 @@ executable Final-Assignment
 
     -- Other library packages from which modules are imported.
     build-depends:    base ^>=4.18.3.0,
-                        scotty,
-                        lucid,
-                        sqlite-simple,
-                        text,
 
     -- Directories containing source files.
     hs-source-dirs:   app
