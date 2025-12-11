@@ -44,10 +44,15 @@ getIndex symbol maze =
         row = getRowIndex symbol maze 0
         col = getColIndex symbol (maze !! row) 0
 
-handleKey :: Char -> IO ()
-handleKey c = 
-    case c of
-        'W' -> 
+-- Top, Left, Bottom, Right
+handleKey :: Char -> (Int, Int) -> (Int, Int)
+handleKey key (y, x) = 
+    case key of
+        'W' -> (y - 1, x)
+        'A' -> (y, x - 1)
+        'S' -> (y + 1, x)
+        'D' -> (y, x + 1)
+        _ -> (y, x)
 
 main :: IO ()
 main = do
@@ -59,11 +64,12 @@ main = do
 
 loop :: Maze -> IO ()
 loop maze = do
-    index <- getIndex '&' maze
-
     key <- getChar
-    handleKey c index
-    putStrLn $ "You pressed: " ++ [c]
+    let index = getIndex '&' maze
+        newIndex = handleKey key index
+
+    putStrLn $ "You pressed: " ++ [key]
+
     printMaze maze
     if c == 'q'
         then putStrLn "Exiting..."
