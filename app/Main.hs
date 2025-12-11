@@ -14,7 +14,7 @@ initialMaze =
     , "# ### # #"
     , "# #   # #"
     , "# # ### #"
-    , "#       #"
+    , "#&      #"
     , "#########"
     ]
 
@@ -83,7 +83,7 @@ loop :: Maze -> IO ()
 loop maze = do
     key <- getChar
     let pos = getPos '&' maze
-        newIndex = tryNewPos key pos
+        newPos = tryNewPos key pos
 
     putStrLn $ "You pressed: " ++ [key]
     movePlayer maze key startPos
