@@ -22,21 +22,27 @@ initialMaze =
 printMaze :: Maze -> IO ()
 printMaze = mapM_ print
 
--- Find column of a character in a row recursively
+-- Find col in a row recursively
 getColIndex :: Char -> String -> Int -> Maybe Int
-getColIndex _ [] _ = Nothing
+getColIndex _ [] _ = error "Symbol not found in row"
 getColIndex symbol (col:cols) x
-    | col == symbol = Just x
+    | col == symbol = x
     | otherwise = getColIndex symbol cols (x + 1)
 
--- Find the (row, col) in the 2D list, recursively
-getRowIndex :: Char -> [String] -> Int -> (Int, Int)
-getRowIndex _ [] _ = error "Symbol not found"
-getRowIndex symbol (row:rows) y =
-    case getColIndex symbol row 0 of
-        Just col -> (y, col)
-        Nothing  -> getRowIndex symbol rows (y + 1)
+-- Find row in maze recursively
+getRowIndex :: Char -> [String] -> Int -> Int
+getRowIndex _ [] _ = error "Symbol not found in maze"
+getRowIndex symbol (row:rows) y
+    | symbol `elem` row = y
+    | otherwise = getRowIndex symbol rows (y + 1)
 
+-- Combine (row, col)
+getIndex :: Char -> [String] -> (Int, Int)
+getIndex symbol maze =
+        (row, col)
+    where
+        row = getRowIndex symbol maze 0
+        col = getColIndex symbol (maze !! row) 0
 
 handleKey :: Char -> IO ()
 handleKey c = 
@@ -53,8 +59,10 @@ main = do
 
 loop :: Maze -> IO ()
 loop maze = do
-    c <- getChar
-    handleKey c
+    index <- getIndex '&' maze
+
+    key <- getChar
+    handleKey c index
     putStrLn $ "You pressed: " ++ [c]
     printMaze maze
     if c == 'q'
