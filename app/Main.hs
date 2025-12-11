@@ -37,7 +37,7 @@ getRowIndex symbol (row:rows) y
     | otherwise = getRowIndex symbol rows (y + 1)
 
 -- Combine (row, col)
-getIndex :: Char -> [String] -> (Int, Int)
+getIndex :: Char -> [String] -> Pos
 getIndex symbol maze =
         (row, col)
     where
@@ -45,7 +45,7 @@ getIndex symbol maze =
         col = getColIndex symbol (maze !! row) 0
 
 -- Top, Left, Bottom, Right
-handleKey :: Char -> (Int, Int) -> (Int, Int)
+handleKey :: Char -> Pos -> Pos
 handleKey key (y, x) = 
     case key of
         'W' -> (y - 1, x)
