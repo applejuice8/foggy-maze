@@ -37,22 +37,39 @@ getRowIndex symbol (row:rows) y
     | otherwise = getRowIndex symbol rows (y + 1)
 
 -- Combine (row, col)
-getIndex :: Char -> [String] -> Pos
-getIndex symbol maze =
+getPos :: Char -> [String] -> Pos
+getPos symbol maze =
         (row, col)
     where
         row = getRowIndex symbol maze 0
         col = getColIndex symbol (maze !! row) 0
 
 -- Top, Left, Bottom, Right
-handleKey :: Char -> Pos -> Pos
-handleKey key (y, x) = 
+tryNewPos :: Char -> Pos -> Pos
+tryNewPos key (y, x) = 
     case key of
         'W' -> (y - 1, x)
         'A' -> (y, x - 1)
         'S' -> (y + 1, x)
         'D' -> (y, x + 1)
         _ -> (y, x)
+
+-- Check if new position is a wall / exceeded
+isValidPos :: Maze -> Pos -> Bool
+isValidPos maze (y, x) =
+    let rowLen = length maze
+        colLen = if rowLen == 0 then 0 else length (head maze)
+    in y >= 0 && y < rowLen &&
+        x >= 0 && x < colLen &&
+        (maze !! y !! x) /= '#'
+
+-- Move player if valid
+movePlayer :: Maze -> Char -> Pos -> Pos
+movePlayer maze key pos =
+    let newPos = tryNewPos key pos
+    in if isValidPos maze newPos
+        then newPos
+        else pos
 
 main :: IO ()
 main = do
@@ -65,12 +82,11 @@ main = do
 loop :: Maze -> IO ()
 loop maze = do
     key <- getChar
-    let index = getIndex '&' maze
-        newIndex = handleKey key index
+    let pos = getPos '&' maze
+        newIndex = tryNewPos key pos
 
     putStrLn $ "You pressed: " ++ [key]
+    movePlayer maze key startPos
 
     printMaze maze
-    if c == 'q'
-        then putStrLn "Exiting..."
-        else loop maze
+    loop maze
