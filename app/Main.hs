@@ -23,7 +23,7 @@ printMaze :: Maze -> IO ()
 printMaze = mapM_ print
 
 -- Find col in a row recursively
-getColIndex :: Char -> String -> Int -> Maybe Int
+getColIndex :: Char -> String -> Int -> Int
 getColIndex _ [] _ = error "Symbol not found in row"
 getColIndex symbol (col:cols) x
     | col == symbol = x
