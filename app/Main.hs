@@ -18,20 +18,22 @@ initialMaze =
     , "#########"
     ]
 
+printMaze :: Maze -> IO ()
+printMaze = mapM_ print
+
 main :: IO ()
 main = do
-    -- Disable buffering and echo so keys are read immediately
-    hSetBuffering stdin NoBuffering
-    hSetEcho stdin False
+    hSetBuffering stdin NoBuffering     -- Disable buffering (Key read immediately)
+    hSetEcho stdin False    -- Don't print key entered
 
     putStrLn "Press keys (q to quit):"
-    loop
+    loop initialMaze
 
-loop :: IO ()
-loop = do
-    c <- getChar          -- read a single character immediately
+loop :: Maze -> IO ()
+loop maze = do
+    c <- getChar
     putStrLn $ "You pressed: " ++ [c]
+    printMaze maze
     if c == 'q'
         then putStrLn "Exiting..."
-        else loop
-
+        else loop maze
