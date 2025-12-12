@@ -65,6 +65,7 @@ isValidPos maze (y, x) =
         rows = length maze
         cols = length (head maze)
 
+-- Replace a char in maze
 replaceAt :: Pos -> Char -> Maze -> Maze
 replaceAt (y, x) newChar maze =
     case splitAt y maze of
@@ -73,6 +74,7 @@ replaceAt (y, x) newChar maze =
         _ ->
             maze    -- y out of bounds
 
+-- Replace a char in a row
 replaceChar :: Int -> Char -> String -> String
 replaceChar x newChar row =
     case splitAt x row of
@@ -81,6 +83,7 @@ replaceChar x newChar row =
         _ ->
             row
 
+-- Move player from old to new position
 movePlayer :: Pos -> Pos -> [String] -> Char -> [String]
 movePlayer oldPos newPos maze symbol =
     let mazeWithoutPlayer = replaceAt oldPos ' ' maze
