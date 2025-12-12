@@ -11,7 +11,7 @@ type Pos = (Int, Int)   -- (x, y)
 initialMaze :: Maze
 initialMaze =
     [ "#########"
-    , "#       #"
+    , "#       E"
     , "# ### # #"
     , "# #   # #"
     , "# # ### #"
@@ -65,6 +65,9 @@ isValidPos maze (y, x) =
         rows = length maze
         cols = length (head maze)
 
+symbolExists :: Maze -> Char -> Bool
+symbolExists maze symbol = any (elem symbol) maze
+
 -- Replace a char in maze
 replaceAt :: Pos -> Char -> Maze -> Maze
 replaceAt (y, x) newChar maze =
@@ -107,4 +110,6 @@ loop maze = do
                     then movePlayer oldPos newPos maze '&'
                     else maze
     printMaze newMaze
-    loop newMaze
+    if symbolExists newMaze 'E'
+        then loop newMaze
+        else putStrLn "You escaped!"
