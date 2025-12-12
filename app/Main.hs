@@ -20,7 +20,7 @@ initialMaze =
 
 -- putStrLn for each list item
 printMaze :: Maze -> IO ()
-printMaze = mapM_ print
+printMaze = mapM_ putStrLn
 
 -- Find col in a row recursively
 getColIndex :: Char -> String -> Int -> Int
@@ -57,19 +57,29 @@ tryNewPos key (y, x) =
 -- Check if new position is a wall / exceeded
 isValidPos :: Maze -> Pos -> Bool
 isValidPos maze (y, x) =
-    let rowLen = length maze
-        colLen = if rowLen == 0 then 0 else length (head maze)
-    in y >= 0 && y < rowLen &&
-        x >= 0 && x < colLen &&
-        (maze !! y !! x) /= '#'
+        y >= 0 && y < rows &&
+        x >= 0 && x < cols &&
+        maze !! y !! x /= '#'
+    where
+        rows = length maze
+        cols = length (head maze)
 
--- Move player if valid
-movePlayer :: Maze -> Char -> Pos -> Pos
-movePlayer maze key pos =
-    let newPos = tryNewPos key pos
-    in if isValidPos maze newPos
-        then newPos
-        else pos
+replaceAt :: Pos -> Char -> [String] -> [String]
+replaceAt (y, x) newChar maze =
+    take y maze
+    ++ [ replaceChar x newChar (maze !! y) ]
+    ++ drop (y + 1) maze
+
+replaceChar :: Int -> Char -> String -> String
+replaceChar x newChar row =
+    take x row ++ [newChar] ++ drop (x + 1) row
+
+movePlayer :: Pos -> Pos -> [String] -> [String]
+movePlayer oldPos newPos maze =
+    let mazeWithoutPlayer = replaceAt oldPos ' ' maze
+    in  replaceAt newPos '&' mazeWithoutPlayer
+
+
 
 main :: IO ()
 main = do
@@ -77,16 +87,16 @@ main = do
     hSetEcho stdin False    -- Don't print key entered
 
     putStrLn "Press keys (q to quit):"
+    printMaze initialMaze
     loop initialMaze
 
 loop :: Maze -> IO ()
 loop maze = do
     key <- getChar
-    let pos = getPos '&' maze
-        newPos = tryNewPos key pos
-
-    putStrLn $ "You pressed: " ++ [key]
-    movePlayer maze key startPos
-
-    printMaze maze
-    loop maze
+    let oldPos = getPos '&' maze
+        newPos = tryNewPos key oldPos
+        newMaze = if isValidPos maze newPos
+                    then movePlayer oldPos newPos maze
+                    else maze
+    printMaze newMaze
+    loop newMaze
