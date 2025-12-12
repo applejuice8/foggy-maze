@@ -64,15 +64,21 @@ isValidPos maze (y, x) =
         rows = length maze
         cols = length (head maze)
 
-replaceAt :: Pos -> Char -> [String] -> [String]
+replaceAt :: Pos -> Char -> Maze -> [String]
 replaceAt (y, x) newChar maze =
-    take y maze
-    ++ [ replaceChar x newChar (maze !! y) ]
-    ++ drop (y + 1) maze
+    case splitAt y maze of
+        (above, row:below) ->
+            above ++ replaceChar x newChar row : below
+        _ ->
+            maze    -- y out of bounds
 
 replaceChar :: Int -> Char -> String -> String
 replaceChar x newChar row =
-    take x row ++ [newChar] ++ drop (x + 1) row
+    case splitAt x row of
+        (before, _:after) ->
+            before ++ newChar : after
+        _ ->
+            row
 
 movePlayer :: Pos -> Pos -> [String] -> [String]
 movePlayer oldPos newPos maze =
