@@ -1,6 +1,7 @@
 module Main where
 
 import System.IO
+import Data.Char (toUpper)
 
 -- Types
 type Maze = [String]
@@ -47,7 +48,7 @@ getPos symbol maze =
 -- Top, Left, Bottom, Right
 tryNewPos :: Char -> Pos -> Pos
 tryNewPos key (y, x) = 
-    case key of
+    case toUpper key of
         'W' -> (y - 1, x)
         'A' -> (y, x - 1)
         'S' -> (y + 1, x)
@@ -64,7 +65,7 @@ isValidPos maze (y, x) =
         rows = length maze
         cols = length (head maze)
 
-replaceAt :: Pos -> Char -> Maze -> [String]
+replaceAt :: Pos -> Char -> Maze -> Maze
 replaceAt (y, x) newChar maze =
     case splitAt y maze of
         (above, row:below) ->
@@ -80,12 +81,10 @@ replaceChar x newChar row =
         _ ->
             row
 
-movePlayer :: Pos -> Pos -> [String] -> [String]
-movePlayer oldPos newPos maze =
+movePlayer :: Pos -> Pos -> [String] -> Char -> [String]
+movePlayer oldPos newPos maze symbol =
     let mazeWithoutPlayer = replaceAt oldPos ' ' maze
-    in  replaceAt newPos '&' mazeWithoutPlayer
-
-
+    in replaceAt newPos symbol mazeWithoutPlayer
 
 main :: IO ()
 main = do
@@ -102,7 +101,7 @@ loop maze = do
     let oldPos = getPos '&' maze
         newPos = tryNewPos key oldPos
         newMaze = if isValidPos maze newPos
-                    then movePlayer oldPos newPos maze
+                    then movePlayer oldPos newPos maze '&'
                     else maze
     printMaze newMaze
     loop newMaze
