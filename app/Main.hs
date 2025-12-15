@@ -2,6 +2,7 @@ module Main where
 
 import System.IO
 import Data.Char (toUpper)
+import System.Console.ANSI (clearScreen)
 
 -- Types
 type Maze = [String]
@@ -109,6 +110,7 @@ loop maze = do
         newMaze = if isValidPos maze newPos
                     then movePlayer oldPos newPos maze '&'
                     else maze
+    clearScreen
     printMaze newMaze
     if symbolExists newMaze 'E'
         then loop newMaze
