@@ -11,12 +11,12 @@ data Score = Score
     } deriving (Show, Eq, Ord)
 
 scoreToRecord :: Score -> [String]
-scoreToRecord (Score playerName timeTaken) =
-    [playerName, show timeTaken]
+scoreToRecord (Score name time) =
+    [name, show time]
 
 recordToScore :: [String] -> Either String Score
-recordToScore [playerName, timeTaken] =
-    Right (Score playerName (read timeTaken))
+recordToScore [name, timeStr] =
+    Right (Score name (read timeStr))
 recordToScore _ =
     Left "Invalid CSV record"
 
