@@ -31,10 +31,18 @@ readCSV file = do
                 Right rows -> return rows
                 Left _     -> return []
 
+isEmptyRow :: [String] -> Bool
+isEmptyRow [] = True
+isEmptyRow fields = all null fields
+
+cleanRows :: [[String]] -> [[String]]
+cleanRows = filter (not . isEmptyRow)
+
 writeScore :: FilePath -> Score -> IO ()
 writeScore file score = do
     rows <- readCSV file
-    let newRows = rows ++ [scoreToRecord score]
+    let validRows = cleanRows rows
+        newRows = validRows ++ [scoreToRecord score]
     writeFile file (printCSV newRows)
 
 readScores :: FilePath -> IO [Score]
