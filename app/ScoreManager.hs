@@ -68,13 +68,3 @@ readScores file = do
 topScores :: Int -> [Score] -> [Score]
 topScores n =
     take n . sortOn timeTaken
-
--- main :: IO ()
--- main = do
---     let file = "app/scores.csv"
-
---     writeScore file (Score "Colin" 12.38)
---     writeScore file (Score "Alice" 9.12)
-
---     scores <- readScores file
---     mapM_ print (topScores 5 scores)

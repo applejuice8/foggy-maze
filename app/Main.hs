@@ -95,6 +95,48 @@ movePlayer oldPos newPos maze symbol =
     let mazeWithoutPlayer = replaceAt oldPos ' ' maze
     in replaceAt newPos symbol mazeWithoutPlayer
 
+handleMove :: Maze -> Char -> Maze
+handleMove maze key =
+    let oldPos = getPos '&' maze
+        newPos = tryNewPos key oldPos
+    in if isValidPos maze newPos
+        then movePlayer oldPos newPos maze '&'
+        else maze
+
+elapsedSeconds :: UTCTime -> UTCTime -> Double
+elapsedSeconds start end =
+    realToFrac (diffUTCTime end start)
+
+handleWin :: UTCTime -> IO ()
+handleWin startTime = do
+    endTime <- getCurrentTime
+    let time = elapsedSeconds startTime endTime
+
+    putStrLn "You escaped!"
+    putStrLn ("Time taken: " ++ show time ++ " seconds")
+
+    let file = "app/scores.csv"
+        score = Score "Colin" time
+
+    writeScore file score
+
+    putStrLn "\n=== TOP 5 SCORES ==="
+    scores <- readScores file
+    mapM_ print (topScores 5 scores)
+
+
+loop :: Maze -> UTCTime -> IO ()
+loop maze startTime = do
+    key <- getChar
+    let newMaze = handleMove maze key
+
+    clearScreen
+    printMaze newMaze
+
+    if symbolExists newMaze 'E'
+        then loop newMaze startTime
+        else handleWin startTime
+
 main :: IO ()
 main = do
     hSetBuffering stdin NoBuffering     -- Disable buffering (Key read immediately)
@@ -105,35 +147,3 @@ main = do
     putStrLn "Press keys (q to quit):"
     printMaze initialMaze
     loop initialMaze startTime
-
-loop :: Maze -> UTCTime -> IO ()
-loop maze startTime = do
-    key <- getChar
-    let oldPos = getPos '&' maze
-        newPos = tryNewPos key oldPos
-        newMaze = if isValidPos maze newPos
-                    then movePlayer oldPos newPos maze '&'
-                    else maze
-    clearScreen
-    printMaze newMaze
-    if symbolExists newMaze 'E'
-    then loop newMaze startTime
-    else do
-        endTime <- getCurrentTime
-        let time =
-                realToFrac (diffUTCTime endTime startTime) :: Double
-
-        putStrLn "You escaped!"
-        putStrLn ("Time taken: " ++ show time ++ " seconds")
-
-        let file = "app/scores.csv"
-            score = Score "Colin" time
-
-        writeScore file score
-
-        putStrLn "\n=== TOP 5 SCORES ==="
-        scores <- readScores file
-        let top5 = topScores 5 scores
-        mapM_ print top5
-
-
