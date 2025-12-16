@@ -95,6 +95,7 @@ movePlayer oldPos newPos maze symbol =
     let mazeWithoutPlayer = replaceAt oldPos ' ' maze
     in replaceAt newPos symbol mazeWithoutPlayer
 
+-- Handle movement key presses
 handleMove :: Maze -> Char -> Maze
 handleMove maze key =
     let oldPos = getPos '&' maze
@@ -103,14 +104,16 @@ handleMove maze key =
         then movePlayer oldPos newPos maze '&'
         else maze
 
-elapsedSeconds :: UTCTime -> UTCTime -> Double
-elapsedSeconds start end =
+-- Calculate timelapse
+calcTimelapse :: UTCTime -> UTCTime -> Double
+calcTimelapse start end =
     realToFrac (diffUTCTime end start)
 
+-- Run when win
 handleWin :: UTCTime -> IO ()
 handleWin startTime = do
     endTime <- getCurrentTime
-    let time = elapsedSeconds startTime endTime
+    let time = calcTimelapse startTime endTime
 
     putStrLn "You escaped!"
     putStrLn ("Time taken: " ++ show time ++ " seconds")
@@ -124,7 +127,7 @@ handleWin startTime = do
     scores <- readScores file
     mapM_ print (topScores 5 scores)
 
-
+-- Game loop
 loop :: Maze -> UTCTime -> IO ()
 loop maze startTime = do
     key <- getChar
