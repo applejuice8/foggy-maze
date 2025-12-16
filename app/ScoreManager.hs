@@ -1,6 +1,8 @@
 module ScoreManager
     ( Score(..)
     , writeScore
+    , topScores
+    , readScores
     ) where
 
 import System.Directory (doesFileExist)

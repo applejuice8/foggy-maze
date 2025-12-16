@@ -126,6 +126,14 @@ loop maze startTime = do
         putStrLn "You escaped!"
         putStrLn ("Time taken: " ++ show time ++ " seconds")
 
-        let score = Score "Colin" time
-        writeScore "app/scores.csv" score
+        let file = "app/scores.csv"
+            score = Score "Colin" time
+
+        writeScore file score
+
+        putStrLn "\n=== TOP 5 SCORES ==="
+        scores <- readScores file
+        let top5 = topScores 5 scores
+        mapM_ print top5
+
 
