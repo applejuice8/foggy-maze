@@ -1,6 +1,8 @@
 import System.Directory (doesFileExist)
 import Text.CSV (parseCSVFromFile, printCSV)
 import Data.List (sortOn)
+import Data.Maybe (mapMaybe)
+import Text.Read (readMaybe)
 
 type Name = String
 type Seconds = Double
@@ -14,11 +16,11 @@ scoreToRecord :: Score -> [String]
 scoreToRecord (Score name time) =
     [name, show time]
 
-recordToScore :: [String] -> Either String Score
-recordToScore [name, timeStr] =
-    Right (Score name (read timeStr))
-recordToScore _ =
-    Left "Invalid CSV record"
+recordToScore :: [String] -> Maybe Score
+recordToScore [name, timeStr] = do
+    secs <- readMaybe timeStr
+    Just (Score name secs)
+recordToScore _ = Nothing
 
 -- Read csv file if exist
 readCSV :: FilePath -> IO [[String]]
@@ -53,10 +55,7 @@ writeScore file score = do
 readScores :: FilePath -> IO [Score]
 readScores file = do
     rows <- readCSV file
-    return
-        [ score
-        | Right score <- map recordToScore rows
-        ]
+    return (mapMaybe recordToScore rows)
 
 -- Take top n scores
 topScores :: Int -> [Score] -> [Score]
