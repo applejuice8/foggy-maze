@@ -3,6 +3,8 @@ module Main where
 import System.IO
 import Data.Char (toUpper)
 import System.Console.ANSI (clearScreen)
+import Data.Time.Clock
+import ScoreManager
 
 -- Types
 type Maze = [String]
@@ -98,12 +100,14 @@ main = do
     hSetBuffering stdin NoBuffering     -- Disable buffering (Key read immediately)
     hSetEcho stdin False    -- Don't print key entered
 
+    startTime <- getCurrentTime
+
     putStrLn "Press keys (q to quit):"
     printMaze initialMaze
-    loop initialMaze
+    loop initialMaze startTime
 
-loop :: Maze -> IO ()
-loop maze = do
+loop :: Maze -> UTCTime -> IO ()
+loop maze startTime = do
     key <- getChar
     let oldPos = getPos '&' maze
         newPos = tryNewPos key oldPos
@@ -113,5 +117,15 @@ loop maze = do
     clearScreen
     printMaze newMaze
     if symbolExists newMaze 'E'
-        then loop newMaze
-        else putStrLn "You escaped!"
+    then loop newMaze startTime
+    else do
+        endTime <- getCurrentTime
+        let time =
+                realToFrac (diffUTCTime endTime startTime) :: Double
+
+        putStrLn "You escaped!"
+        putStrLn ("Time taken: " ++ show time ++ " seconds")
+
+        let score = Score "Colin" time
+        writeScore "app/scores.csv" score
+

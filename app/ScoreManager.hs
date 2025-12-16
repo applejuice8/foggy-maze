@@ -1,3 +1,8 @@
+module ScoreManager
+    ( Score(..)
+    , writeScore
+    ) where
+
 import System.Directory (doesFileExist)
 import Text.CSV (parseCSVFromFile, printCSV)
 import Data.List (sortOn)
@@ -62,12 +67,12 @@ topScores :: Int -> [Score] -> [Score]
 topScores n =
     take n . sortOn timeTaken
 
-main :: IO ()
-main = do
-    let file = "app/scores.csv"
+-- main :: IO ()
+-- main = do
+--     let file = "app/scores.csv"
 
-    writeScore file (Score "Colin" 12.38)
-    writeScore file (Score "Alice" 9.12)
+--     writeScore file (Score "Colin" 12.38)
+--     writeScore file (Score "Alice" 9.12)
 
-    scores <- readScores file
-    mapM_ print (topScores 5 scores)
+--     scores <- readScores file
+--     mapM_ print (topScores 5 scores)

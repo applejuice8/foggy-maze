@@ -2,11 +2,11 @@ import Text.Read (readMaybe)
 
 -- Show menu
 menu :: IO ()
-menu = do
-    putStrLn "==============================="
-    putStrLn "= 1. Calculate Area Rectangle ="
-    putStrLn "= 2. Exit ="
-    putStrLn "==============================="
+menu = 
+    putStrLn "===============================" <>
+    putStrLn "= 1. Calculate Area Rectangle =" <>
+    putStrLn "= 2. Exit                     =" <>
+    putStrLn "===============================" <>
     putStrLn "Enter your input ="
 
 -- Rectangle area calculation
