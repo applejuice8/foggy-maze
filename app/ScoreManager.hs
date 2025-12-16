@@ -20,6 +20,7 @@ recordToScore [playerName, timeTaken] =
 recordToScore _ =
     Left "Invalid CSV record"
 
+-- Read csv file if exist
 readCSV :: FilePath -> IO [[String]]
 readCSV file = do
     exists <- doesFileExist file
@@ -31,13 +32,16 @@ readCSV file = do
                 Right rows -> return rows
                 Left _     -> return []
 
+-- Check if a row is empty
 isEmptyRow :: [String] -> Bool
 isEmptyRow [] = True
 isEmptyRow fields = all null fields
 
+-- Filter empty rows
 cleanRows :: [[String]] -> [[String]]
 cleanRows = filter (not . isEmptyRow)
 
+-- Write scores to csv file
 writeScore :: FilePath -> Score -> IO ()
 writeScore file score = do
     rows <- readCSV file
@@ -45,6 +49,7 @@ writeScore file score = do
         newRows = validRows ++ [scoreToRecord score]
     writeFile file (printCSV newRows)
 
+-- Read scores from csv file
 readScores :: FilePath -> IO [Score]
 readScores file = do
     rows <- readCSV file
@@ -53,6 +58,7 @@ readScores file = do
         | Right score <- map recordToScore rows
         ]
 
+-- Take top n scores
 topScores :: Int -> [Score] -> [Score]
 topScores n =
     take n . sortOn timeTaken
