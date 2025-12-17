@@ -56,7 +56,7 @@ writeScore :: FilePath -> Score -> IO ()
 writeScore file score = do
     rows <- readCSV file
     let validRows = cleanRows rows
-        newRows = validRows ++ [scoreToRow score]
+        newRows   = validRows ++ [scoreToRow score]
     writeFile file (printCSV newRows)
 
 -- Read scores from csv file

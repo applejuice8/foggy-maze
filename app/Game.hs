@@ -14,18 +14,22 @@ type ColoredChar = String
 
 data Tile
     = Wall
-    | Empty
     | Exit
     | Player
     | Unknown
+    | Empty
     deriving (Eq)
 
-data Color = Green | Yellow | White | Gray | Reset
+data Color
+    = Green 
+    | Yellow 
+    | White 
+    | Gray 
+    | Reset
 
 -- Data types conversion
 charToTile :: Char -> Tile
 charToTile '#' = Wall
-charToTile ' ' = Empty
 charToTile 'E' = Exit
 charToTile 'P' = Player
 charToTile '?' = Unknown
@@ -33,10 +37,10 @@ charToTile _   = Empty
 
 tileToColoredChar :: Tile -> ColoredChar
 tileToColoredChar Wall    = colorCode White  ++ "#" ++ colorCode Reset
-tileToColoredChar Empty   = " "
 tileToColoredChar Exit    = colorCode Green  ++ "E" ++ colorCode Reset
 tileToColoredChar Player  = colorCode Yellow ++ "P" ++ colorCode Reset
-tileToColoredChar Unknown = colorCode Gray ++ "?" ++ colorCode Reset
+tileToColoredChar Unknown = colorCode Gray   ++ "?" ++ colorCode Reset
+tileToColoredChar _       = " "
 
 -- ANSI escape codes
 colorCode :: Color -> String
@@ -81,14 +85,14 @@ getColIndex :: Tile -> [Tile] -> Int -> Int
 getColIndex _ [] _ = error "Tile not found in row"
 getColIndex tile (col:cols) x
     | col == tile = x
-    | otherwise = getColIndex tile cols (x + 1)
+    | otherwise   = getColIndex tile cols (x + 1)
 
 -- Find row in maze recursively
 getRowIndex :: Tile -> Maze -> Int -> Int
 getRowIndex _ [] _ = error "Tile not found in maze"
 getRowIndex tile (row:rows) y
     | tile `elem` row = y
-    | otherwise = getRowIndex tile rows (y + 1)
+    | otherwise       = getRowIndex tile rows (y + 1)
 
 -- Combine (row, col)
 getPos :: Tile -> Maze -> Pos
@@ -163,8 +167,8 @@ calcTimelapse start end =
 handleWin :: Name -> UTCTime -> IO ()
 handleWin name startTime = do
     endTime <- getCurrentTime
-    let time = calcTimelapse startTime endTime
-        file = "app/scores.csv"
+    let time  = calcTimelapse startTime endTime
+        file  = "app/scores.csv"
         score = Score name time
 
     putStrLn "You escaped!"
@@ -175,10 +179,9 @@ handleWin name startTime = do
 loop :: Maze -> Name -> UTCTime  -> IO ()
 loop maze name startTime = do
     key <- getChar
-    let newMaze = handleMove maze key
     clearScreen
-
-    let playerPos = getPos Player newMaze
+    let newMaze   = handleMove maze key
+        playerPos = getPos Player newMaze
     printMaze newMaze playerPos
 
     if tileExists newMaze Exit
