@@ -6,10 +6,12 @@ import ScoreManager (readScores, topScores)
 -- Show menu
 menu :: IO ()
 menu = 
-    putStrLn "================================" <>
-    putStrLn "| 1. Play                      |" <>
+    putStrLn "\n================================" <>
+    putStrLn "| 1. Play game                 |" <>
     putStrLn "| 2. View top 5 scores         |" <>
-    putStrLn "| 3. Exit                      |" <>
+    putStrLn "| 3. How to play?              |" <>
+    putStrLn "| 4. Reset scores              |" <>
+    putStrLn "| 5. Exit                      |" <>
     putStrLn "================================" <>
     putStrLn "Enter your choice: "
 
@@ -39,7 +41,25 @@ process choice = case choice of
         mapM_ print (topScores 5 scores)
         main
 
-    "3" -> putStrLn "Thanks for playing!"
+    "3" -> do
+        putStrLn "\n========= How to Play? ========="
+        putStrLn "- Find the exit (E) in the maze"
+        putStrLn "- Use the WASD keys to move"
+        putStrLn "- Can only see 5x5 area around player"
+        putStrLn "- Score is based on time taken"
+        main
+
+    "4" -> do
+        putStrLn "Are you sure? (y/n): "
+        confirm <- getLine
+        if confirm == "y"
+            then do
+                writeFile "app/scores.csv" ""
+                putStrLn "Scores reset!"
+            else putStrLn "Cancelled"
+        main
+
+    "5" -> putStrLn "Thanks for playing!"
 
     _   -> do
         putStrLn "Invalid choice. Please try again."
