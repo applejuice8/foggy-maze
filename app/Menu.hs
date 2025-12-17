@@ -1,5 +1,3 @@
-import Text.Read (readMaybe)
-
 -- Show menu
 menu :: IO ()
 menu = 
@@ -11,15 +9,15 @@ menu =
     putStrLn "Enter your choice: "
 
 -- Prompt name
-promptName :: IO Int
+promptName :: IO String
 promptName = do
     putStrLn "Enter name: "
-    input <- getLine
-    case readMaybe input of
-        Just name -> return name
-        Nothing -> do
+    name <- getLine
+    if null name
+        then do
             putStrLn "Invalid name. Please try again."
             promptName
+        else return name
 
 -- Process menu selection
 process :: String -> IO ()
