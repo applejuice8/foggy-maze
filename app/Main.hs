@@ -28,8 +28,8 @@ promptName = do
 process :: String -> IO ()
 process choice = case choice of
     "1" -> do
-        _ <- promptName
-        playGame
+        name <- promptName
+        playGame name
         main
 
     "2" -> do

@@ -110,20 +110,20 @@ calcTimelapse start end =
     realToFrac (diffUTCTime end start)
 
 -- Run when win
-handleWin :: UTCTime -> IO ()
-handleWin startTime = do
+handleWin :: String -> UTCTime -> IO ()
+handleWin name startTime = do
     endTime <- getCurrentTime
     let time = calcTimelapse startTime endTime
         file = "app/scores.csv"
-        score = Score "Colin" time
+        score = Score name time
 
     putStrLn "You escaped!"
     putStrLn ("Time taken: " ++ show time ++ " seconds")
     writeScore file score
 
 -- Game loop
-loop :: Maze -> UTCTime -> IO ()
-loop maze startTime = do
+loop :: Maze -> String -> UTCTime  -> IO ()
+loop maze name startTime = do
     key <- getChar
     let newMaze = handleMove maze key
 
@@ -131,11 +131,11 @@ loop maze startTime = do
     printMaze newMaze
 
     if symbolExists newMaze 'E'
-        then loop newMaze startTime
-        else handleWin startTime
+        then loop newMaze name startTime
+        else handleWin name startTime
 
-playGame :: IO ()
-playGame = do
+playGame :: String -> IO ()
+playGame name = do
     hSetBuffering stdin NoBuffering     -- Disable buffering (Key read immediately)
     hSetEcho stdin False    -- Don't print key entered
 
@@ -143,4 +143,4 @@ playGame = do
 
     putStrLn "Press keys (q to quit):"
     printMaze initialMaze
-    loop initialMaze startTime
+    loop initialMaze name startTime
