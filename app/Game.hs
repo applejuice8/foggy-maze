@@ -10,27 +10,41 @@ import ScoreManager (Score(..), writeScore)
 type Name = String
 type Maze = [[Tile]]
 type Pos = (Int, Int)   -- (x, y)
+type ColoredChar = String
 
 data Tile
     = Wall
     | Empty
     | Exit
     | Player
+    | Unknown
     deriving (Eq)
+
+data Color = Green | Yellow | White | Gray | Reset
 
 -- Data types conversion
 charToTile :: Char -> Tile
 charToTile '#' = Wall
 charToTile ' ' = Empty
 charToTile 'E' = Exit
-charToTile '&' = Player
+charToTile 'P' = Player
+charToTile '?' = Unknown
 charToTile _   = Empty
 
-tileToChar :: Tile -> Char
-tileToChar Wall   = '#'
-tileToChar Empty  = ' '
-tileToChar Exit   = 'E'
-tileToChar Player = '&'
+-- ANSI escape codes
+colorCode :: Color -> String
+colorCode Green  = "\ESC[92m"
+colorCode Yellow = "\ESC[93m"
+colorCode White  = "\ESC[37m"
+colorCode Gray   = "\ESC[90m"
+colorCode Reset  = "\ESC[0m"
+
+tileToColoredChar :: Tile -> ColoredChar
+tileToColoredChar Wall    = colorCode White  ++ "#" ++ colorCode Reset
+tileToColoredChar Empty   = " "
+tileToColoredChar Exit    = colorCode Green  ++ "E" ++ colorCode Reset
+tileToColoredChar Player  = colorCode Yellow ++ "P" ++ colorCode Reset
+tileToColoredChar Unknown = colorCode Gray ++ "?" ++ colorCode Reset
 
 -- Sample Maze
 initialMaze :: Maze
@@ -41,7 +55,7 @@ initialMaze =
         , "# ### # #"
         , "# #   # #"
         , "# # ### #"
-        , "#&      #"
+        , "#P      #"
         , "#########"
         ]
 
@@ -52,13 +66,13 @@ printMaze maze playerPos = do
     mapM_ (putStrLn . printRow playerPos) (zip [0..] maze)
 
 -- Print a single row
-printRow :: Pos -> (Int, [Tile]) -> String
+printRow :: Pos -> (Int, [Tile]) -> ColoredChar
 printRow (py, px) (y, row) =
-        zipWith render [0..] row
+        concat $ zipWith render [0..] row
     where
         render x tile
-            | abs (y - py) <= 1 && abs (x - px) <= 1 = tileToChar tile
-            | otherwise                              = '?'
+            | abs (y - py) <= 1 && abs (x - px) <= 1 = tileToColoredChar tile
+            | otherwise                              = tileToColoredChar Unknown
 
 -- Find col in a row recursively
 getColIndex :: Tile -> [Tile] -> Int -> Int
