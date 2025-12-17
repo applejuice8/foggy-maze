@@ -1,6 +1,6 @@
 module Main where
 
-import Game (playGame)
+import Game (Name, playGame)
 import ScoreManager (readScores, topScores)
 
 -- Show menu
@@ -14,7 +14,7 @@ menu =
     putStrLn "Enter your choice: "
 
 -- Prompt name
-promptName :: IO String
+promptName :: IO Name
 promptName = do
     putStrLn "Enter name: "
     name <- getLine

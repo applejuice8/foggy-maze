@@ -1,8 +1,6 @@
 module ScoreManager
-    ( Score(..)
-    , writeScore
-    , topScores
-    , readScores
+    ( Score(..), writeScore     -- Game.hs
+    , readScores, topScores     -- Main.hs
     ) where
 
 import System.Directory (doesFileExist)
@@ -11,26 +9,29 @@ import Data.List (sortOn)
 import Data.Maybe (mapMaybe)
 import Text.Read (readMaybe)
 
+-- Custom data types
 type Name = String
 type Seconds = Double
+type Row = [String]
 
 data Score = Score
     { playerName :: Name
     , timeTaken  :: Seconds
     } deriving (Show, Eq, Ord)
 
-scoreToRecord :: Score -> [String]
-scoreToRecord (Score name time) =
+-- Change data types
+scoreToRow :: Score -> Row
+scoreToRow (Score name time) =
     [name, show time]
 
-recordToScore :: [String] -> Maybe Score
-recordToScore [name, timeStr] = do
+rowToScore :: Row -> Maybe Score
+rowToScore [name, timeStr] = do
     secs <- readMaybe timeStr
     Just (Score name secs)
-recordToScore _ = Nothing
+rowToScore _ = Nothing
 
 -- Read csv file if exist
-readCSV :: FilePath -> IO [[String]]
+readCSV :: FilePath -> IO [Row]
 readCSV file = do
     exists <- doesFileExist file
     if not exists
@@ -42,12 +43,12 @@ readCSV file = do
                 Left _     -> return []
 
 -- Check if a row is empty
-isEmptyRow :: [String] -> Bool
+isEmptyRow :: Row -> Bool
 isEmptyRow [] = True
 isEmptyRow fields = all null fields
 
 -- Filter empty rows
-cleanRows :: [[String]] -> [[String]]
+cleanRows :: [Row] -> [Row]
 cleanRows = filter (not . isEmptyRow)
 
 -- Write scores to csv file
@@ -55,14 +56,14 @@ writeScore :: FilePath -> Score -> IO ()
 writeScore file score = do
     rows <- readCSV file
     let validRows = cleanRows rows
-        newRows = validRows ++ [scoreToRecord score]
+        newRows = validRows ++ [scoreToRow score]
     writeFile file (printCSV newRows)
 
 -- Read scores from csv file
 readScores :: FilePath -> IO [Score]
 readScores file = do
     rows <- readCSV file
-    return (mapMaybe recordToScore rows)
+    return (mapMaybe rowToScore rows)
 
 -- Take top n scores
 topScores :: Int -> [Score] -> [Score]

@@ -1,4 +1,4 @@
-module Game (playGame) where
+module Game (Name, playGame) where
 
 import System.IO
 import Data.Char (toUpper)
@@ -6,7 +6,8 @@ import System.Console.ANSI (clearScreen)
 import Data.Time.Clock
 import ScoreManager (Score(..), writeScore)
 
--- Types
+-- Custom data types
+type Name = String
 type Maze = [String]
 type Pos = (Int, Int)   -- (x, y)
 
@@ -34,14 +35,14 @@ getColIndex symbol (col:cols) x
     | otherwise = getColIndex symbol cols (x + 1)
 
 -- Find row in maze recursively
-getRowIndex :: Char -> [String] -> Int -> Int
+getRowIndex :: Char -> Maze -> Int -> Int
 getRowIndex _ [] _ = error "Symbol not found in maze"
 getRowIndex symbol (row:rows) y
     | symbol `elem` row = y
     | otherwise = getRowIndex symbol rows (y + 1)
 
 -- Combine (row, col)
-getPos :: Char -> [String] -> Pos
+getPos :: Char -> Maze -> Pos
 getPos symbol maze =
         (row, col)
     where
@@ -90,7 +91,7 @@ replaceChar x newChar row =
             row
 
 -- Move player from old to new position
-movePlayer :: Pos -> Pos -> [String] -> Char -> [String]
+movePlayer :: Pos -> Pos -> Maze -> Char -> Maze
 movePlayer oldPos newPos maze symbol =
     let mazeWithoutPlayer = replaceAt oldPos ' ' maze
     in replaceAt newPos symbol mazeWithoutPlayer
@@ -110,7 +111,7 @@ calcTimelapse start end =
     realToFrac (diffUTCTime end start)
 
 -- Run when win
-handleWin :: String -> UTCTime -> IO ()
+handleWin :: Name -> UTCTime -> IO ()
 handleWin name startTime = do
     endTime <- getCurrentTime
     let time = calcTimelapse startTime endTime
@@ -122,7 +123,7 @@ handleWin name startTime = do
     writeScore file score
 
 -- Game loop
-loop :: Maze -> String -> UTCTime  -> IO ()
+loop :: Maze -> Name -> UTCTime  -> IO ()
 loop maze name startTime = do
     key <- getChar
     let newMaze = handleMove maze key
@@ -134,7 +135,7 @@ loop maze name startTime = do
         then loop newMaze name startTime
         else handleWin name startTime
 
-playGame :: String -> IO ()
+playGame :: Name -> IO ()
 playGame name = do
     hSetBuffering stdin NoBuffering     -- Disable buffering (Key read immediately)
     hSetEcho stdin False    -- Don't print key entered
@@ -144,5 +145,5 @@ playGame name = do
     loop initialMaze name startTime
 
     -- Restore terminal state
-    hSetEcho stdin True
     hSetBuffering stdin LineBuffering
+    hSetEcho stdin True
