@@ -4,7 +4,7 @@ import System.IO
 import Data.Char (toUpper)
 import System.Console.ANSI (clearScreen)
 import Data.Time.Clock
-import ScoreManager
+import ScoreManager (Score(..), writeScore)
 
 -- Types
 type Maze = [String]
@@ -114,18 +114,12 @@ handleWin :: UTCTime -> IO ()
 handleWin startTime = do
     endTime <- getCurrentTime
     let time = calcTimelapse startTime endTime
+        file = "app/scores.csv"
+        score = Score "Colin" time
 
     putStrLn "You escaped!"
     putStrLn ("Time taken: " ++ show time ++ " seconds")
-
-    let file = "app/scores.csv"
-        score = Score "Colin" time
-
     writeScore file score
-
-    putStrLn "\n=== TOP 5 SCORES ==="
-    scores <- readScores file
-    mapM_ print (topScores 5 scores)
 
 -- Game loop
 loop :: Maze -> UTCTime -> IO ()
