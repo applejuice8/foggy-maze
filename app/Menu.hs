@@ -14,37 +14,26 @@ menu =
 calculateRectangle :: Num a => a -> a -> a
 calculateRectangle width height = width * height
 
--- Prompt for width
-promptWidth :: IO Int
-promptWidth = do
-    putStrLn "Enter width ="
+-- Prompt name
+promptName :: IO Int
+promptName = do
+    putStrLn "Enter name: "
     input <- getLine
     case readMaybe input of
-        Just n -> return n
+        Just name -> return name
         Nothing -> do
-            putStrLn "Invalid number, try again."
-            promptWidth
-
--- Prompt for height
-promptHeight :: IO Int
-promptHeight = do
-    putStrLn "Enter height ="
-    input <- getLine
-    case readMaybe input of
-        Just n -> return n
-        Nothing -> do
-            putStrLn "Invalid number, try again."
-            promptHeight
+            putStrLn "Invalid name. Please try again."
+            promptName
 
 -- Process menu selection
 process :: String -> IO ()
 process choice = case choice of
     "1" -> do
-        width <- promptWidth
-        height <- promptHeight
-        putStrLn ("The result is " <> show (calculateRectangle width height))
+        name <- promptName
+        putStrLn name
         main
-    "2" -> putStrLn "Thanks for using the program"
+    "2" -> putStrLn "Print top scores"
+    "3" -> putStrLn "Thanks for playing!"
     _   -> do
         putStrLn "Invalid selection, try again."
         main
