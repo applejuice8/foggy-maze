@@ -54,13 +54,17 @@ colorCode Reset  = "\ESC[0m"
 initialMaze :: Maze
 initialMaze =
     map (map charToTile)
-        [ "#########"
-        , "#       E"
-        , "# ### # #"
-        , "# #   # #"
-        , "# # ### #"
-        , "#P      #"
-        , "#########"
+        [ "#############"
+        , "#P    #     #"
+        , "### # ### # #"
+        , "#   #     # #"
+        , "# ### ##### #"
+        , "#     #     #"
+        , "# ### # ### #"
+        , "# #   #   # #"
+        , "# # ##### # #"
+        , "#     #     E"
+        , "#############"
         ]
 
 -- Print maze
@@ -76,7 +80,7 @@ printRow (py, px) (y, row) =
     where
         render x tile =
             tileToColoredChar $
-                if abs (y - py) <= 1 && abs (x - px) <= 1
+                if abs (y - py) <= 2 && abs (x - px) <= 2
                 then tile
                 else Unknown
 

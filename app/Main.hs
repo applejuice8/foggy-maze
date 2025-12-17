@@ -6,11 +6,11 @@ import ScoreManager (readScores, topScores)
 -- Show menu
 menu :: IO ()
 menu = 
-    putStrLn "===============================" <>
-    putStrLn "= 1. Play                     =" <>
-    putStrLn "= 2. View top 5 scores        =" <>
-    putStrLn "= 3. Exit                     =" <>
-    putStrLn "===============================" <>
+    putStrLn "================================" <>
+    putStrLn "| 1. Play                      |" <>
+    putStrLn "| 2. View top 5 scores         |" <>
+    putStrLn "| 3. Exit                      |" <>
+    putStrLn "================================" <>
     putStrLn "Enter your choice: "
 
 -- Prompt name
@@ -35,7 +35,7 @@ process choice = case choice of
     "2" -> do
         let file = "app/scores.csv"
         scores <- readScores file
-        putStrLn "\n=== TOP 5 SCORES ==="
+        putStrLn "\n========= Top 5 Scores ========="
         mapM_ print (topScores 5 scores)
         main
 
