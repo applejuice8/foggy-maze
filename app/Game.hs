@@ -45,10 +45,20 @@ initialMaze =
         , "#########"
         ]
 
--- putStrLn for each list item
-printMaze :: Maze -> IO ()
-printMaze =
-    mapM_ (putStrLn . map tileToChar)
+-- Print maze
+printMaze :: Maze -> Pos -> IO ()
+printMaze maze playerPos = do
+    putStrLn "Use WASD keys to find the exit"
+    mapM_ (putStrLn . printRow playerPos) (zip [0..] maze)
+
+-- Print a single row
+printRow :: Pos -> (Int, [Tile]) -> String
+printRow (py, px) (y, row) =
+        zipWith render [0..] row
+    where
+        render x tile
+            | abs (y - py) <= 1 && abs (x - px) <= 1 = tileToChar tile
+            | otherwise                              = '?'
 
 -- Find col in a row recursively
 getColIndex :: Tile -> [Tile] -> Int -> Int
@@ -150,9 +160,11 @@ loop :: Maze -> Name -> UTCTime  -> IO ()
 loop maze name startTime = do
     key <- getChar
     let newMaze = handleMove maze key
-
     clearScreen
-    printMaze newMaze
+
+    let playerPos = getPos Player newMaze
+    printMaze newMaze playerPos
+
 
     if tileExists newMaze Exit
         then loop newMaze name startTime
@@ -164,7 +176,9 @@ playGame name = do
     hSetEcho stdin False    -- Don't print key entered
 
     startTime <- getCurrentTime
-    printMaze initialMaze
+    let playerPos = getPos Player initialMaze
+    printMaze initialMaze playerPos
+
     loop initialMaze name startTime
 
     -- Restore terminal state
