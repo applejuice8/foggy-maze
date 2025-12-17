@@ -8,11 +8,7 @@ menu =
     putStrLn "= 2. View top 5 scores        =" <>
     putStrLn "= 3. Exit                     =" <>
     putStrLn "===============================" <>
-    putStrLn "Enter your input ="
-
--- Rectangle area calculation
-calculateRectangle :: Num a => a -> a -> a
-calculateRectangle width height = width * height
+    putStrLn "Enter your choice: "
 
 -- Prompt name
 promptName :: IO Int
@@ -35,7 +31,7 @@ process choice = case choice of
     "2" -> putStrLn "Print top scores"
     "3" -> putStrLn "Thanks for playing!"
     _   -> do
-        putStrLn "Invalid selection, try again."
+        putStrLn "Invalid choice. Please try again."
         main
 
 -- Main function

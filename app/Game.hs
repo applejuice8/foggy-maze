@@ -1,6 +1,4 @@
-module Game
-    ( playGame
-    ) where
+module Game (playGame) where
 
 import System.IO
 import Data.Char (toUpper)
