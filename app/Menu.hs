@@ -4,8 +4,9 @@ import Text.Read (readMaybe)
 menu :: IO ()
 menu = 
     putStrLn "===============================" <>
-    putStrLn "= 1. Calculate Area Rectangle =" <>
-    putStrLn "= 2. Exit                     =" <>
+    putStrLn "= 1. Play                     =" <>
+    putStrLn "= 2. View top 5 scores        =" <>
+    putStrLn "= 3. Exit                     =" <>
     putStrLn "===============================" <>
     putStrLn "Enter your input ="
 
