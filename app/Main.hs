@@ -7,6 +7,8 @@ import ScoreManager (readScores, topScores)
 menu :: IO ()
 menu = 
     putStrLn "\n================================" <>
+    putStrLn "|    Maze Game - Fog of War    |" <>
+    putStrLn "================================" <>
     putStrLn "| 1. Play game                 |" <>
     putStrLn "| 2. View top 5 scores         |" <>
     putStrLn "| 3. How to play?              |" <>
