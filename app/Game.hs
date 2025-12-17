@@ -31,6 +31,13 @@ charToTile 'P' = Player
 charToTile '?' = Unknown
 charToTile _   = Empty
 
+tileToColoredChar :: Tile -> ColoredChar
+tileToColoredChar Wall    = colorCode White  ++ "#" ++ colorCode Reset
+tileToColoredChar Empty   = " "
+tileToColoredChar Exit    = colorCode Green  ++ "E" ++ colorCode Reset
+tileToColoredChar Player  = colorCode Yellow ++ "P" ++ colorCode Reset
+tileToColoredChar Unknown = colorCode Gray ++ "?" ++ colorCode Reset
+
 -- ANSI escape codes
 colorCode :: Color -> String
 colorCode Green  = "\ESC[92m"
@@ -39,14 +46,7 @@ colorCode White  = "\ESC[37m"
 colorCode Gray   = "\ESC[90m"
 colorCode Reset  = "\ESC[0m"
 
-tileToColoredChar :: Tile -> ColoredChar
-tileToColoredChar Wall    = colorCode White  ++ "#" ++ colorCode Reset
-tileToColoredChar Empty   = " "
-tileToColoredChar Exit    = colorCode Green  ++ "E" ++ colorCode Reset
-tileToColoredChar Player  = colorCode Yellow ++ "P" ++ colorCode Reset
-tileToColoredChar Unknown = colorCode Gray ++ "?" ++ colorCode Reset
-
--- Sample Maze
+-- Maze template
 initialMaze :: Maze
 initialMaze =
     map (map charToTile)
@@ -70,9 +70,11 @@ printRow :: Pos -> (Int, [Tile]) -> ColoredChar
 printRow (py, px) (y, row) =
         concat $ zipWith render [0..] row
     where
-        render x tile
-            | abs (y - py) <= 1 && abs (x - px) <= 1 = tileToColoredChar tile
-            | otherwise                              = tileToColoredChar Unknown
+        render x tile =
+            tileToColoredChar $
+                if abs (y - py) <= 1 && abs (x - px) <= 1
+                then tile
+                else Unknown
 
 -- Find col in a row recursively
 getColIndex :: Tile -> [Tile] -> Int -> Int
@@ -179,7 +181,6 @@ loop maze name startTime = do
     let playerPos = getPos Player newMaze
     printMaze newMaze playerPos
 
-
     if tileExists newMaze Exit
         then loop newMaze name startTime
         else handleWin name startTime
@@ -189,6 +190,7 @@ playGame name = do
     hSetBuffering stdin NoBuffering     -- Disable buffering (Key read immediately)
     hSetEcho stdin False    -- Don't print key entered
 
+    clearScreen
     startTime <- getCurrentTime
     let playerPos = getPos Player initialMaze
     printMaze initialMaze playerPos
