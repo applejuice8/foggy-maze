@@ -57,7 +57,7 @@ tryNewPos key (y, x) =
         'A' -> (y, x - 1)
         'S' -> (y + 1, x)
         'D' -> (y, x + 1)
-        _ -> (y, x)
+        _   -> (y, x)
 
 -- Check if new position is a wall / exceeded
 isValidPos :: Maze -> Pos -> Bool
@@ -78,8 +78,7 @@ replaceAt (y, x) newChar maze =
     case splitAt y maze of
         (above, row:below) ->
             above ++ replaceChar x newChar row : below
-        _ ->
-            maze    -- y out of bounds
+        _ -> maze    -- y out of bounds
 
 -- Replace a char in a row
 replaceChar :: Int -> Char -> String -> String
@@ -87,8 +86,7 @@ replaceChar x newChar row =
     case splitAt x row of
         (before, _:after) ->
             before ++ newChar : after
-        _ ->
-            row
+        _ -> row
 
 -- Move player from old to new position
 movePlayer :: Pos -> Pos -> Maze -> Char -> Maze

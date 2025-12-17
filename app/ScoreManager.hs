@@ -10,9 +10,9 @@ import Data.Maybe (mapMaybe)
 import Text.Read (readMaybe)
 
 -- Custom data types
-type Name = String
+type Name    = String
 type Seconds = Double
-type Row = [String]
+type Row     = [String]
 
 data Score = Score
     { playerName :: Name
