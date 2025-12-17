@@ -19,7 +19,7 @@ data Score = Score
     , timeTaken  :: Seconds
     } deriving (Show, Eq, Ord)
 
--- Change data types
+-- Data types conversion
 scoreToRow :: Score -> Row
 scoreToRow (Score name time) =
     [name, show time]

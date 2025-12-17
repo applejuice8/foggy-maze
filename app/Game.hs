@@ -3,51 +3,74 @@ module Game (Name, playGame) where
 import System.IO
 import Data.Char (toUpper)
 import System.Console.ANSI (clearScreen)
-import Data.Time.Clock
+import Data.Time.Clock (UTCTime, diffUTCTime, getCurrentTime)
 import ScoreManager (Score(..), writeScore)
 
 -- Custom data types
 type Name = String
-type Maze = [String]
+type Maze = [[Tile]]
 type Pos = (Int, Int)   -- (x, y)
+
+data Tile
+    = Wall
+    | Empty
+    | Exit
+    | Player
+    deriving (Eq)
+
+-- Data types conversion
+charToTile :: Char -> Tile
+charToTile '#' = Wall
+charToTile ' ' = Empty
+charToTile 'E' = Exit
+charToTile '&' = Player
+charToTile _   = Empty
+
+tileToChar :: Tile -> Char
+tileToChar Wall   = '#'
+tileToChar Empty  = ' '
+tileToChar Exit   = 'E'
+tileToChar Player = '&'
 
 -- Sample Maze
 initialMaze :: Maze
 initialMaze =
-    [ "#########"
-    , "#       E"
-    , "# ### # #"
-    , "# #   # #"
-    , "# # ### #"
-    , "#&      #"
-    , "#########"
-    ]
+    map (map charToTile)
+        [ "#########"
+        , "#       E"
+        , "# ### # #"
+        , "# #   # #"
+        , "# # ### #"
+        , "#&      #"
+        , "#########"
+        ]
 
 -- putStrLn for each list item
 printMaze :: Maze -> IO ()
-printMaze = mapM_ putStrLn
+printMaze =
+    mapM_ (putStrLn . map tileToChar)
 
 -- Find col in a row recursively
-getColIndex :: Char -> String -> Int -> Int
-getColIndex _ [] _ = error "Symbol not found in row"
-getColIndex symbol (col:cols) x
-    | col == symbol = x
-    | otherwise = getColIndex symbol cols (x + 1)
+getColIndex :: Tile -> [Tile] -> Int -> Int
+getColIndex _ [] _ = error "Tile not found in row"
+getColIndex tile (col:cols) x
+    | col == tile = x
+    | otherwise = getColIndex tile cols (x + 1)
 
 -- Find row in maze recursively
-getRowIndex :: Char -> Maze -> Int -> Int
-getRowIndex _ [] _ = error "Symbol not found in maze"
-getRowIndex symbol (row:rows) y
-    | symbol `elem` row = y
-    | otherwise = getRowIndex symbol rows (y + 1)
+getRowIndex :: Tile -> Maze -> Int -> Int
+getRowIndex _ [] _ = error "Tile not found in maze"
+getRowIndex tile (row:rows) y
+    | tile `elem` row = y
+    | otherwise = getRowIndex tile rows (y + 1)
 
 -- Combine (row, col)
-getPos :: Char -> Maze -> Pos
-getPos symbol maze =
+getPos :: Tile -> Maze -> Pos
+getPos tile maze =
         (row, col)
     where
-        row = getRowIndex symbol maze 0
-        col = getColIndex symbol (maze !! row) 0
+        row = getRowIndex tile maze 0
+        col = getColIndex tile (maze !! row) 0
 
 -- Top, Left, Bottom, Right
 tryNewPos :: Char -> Pos -> Pos
@@ -64,43 +87,45 @@ isValidPos :: Maze -> Pos -> Bool
 isValidPos maze (y, x) =
         y >= 0 && y < rows &&
         x >= 0 && x < cols &&
-        maze !! y !! x /= '#'
+        maze !! y !! x /= Wall
     where
         rows = length maze
         cols = length (head maze)
 
-symbolExists :: Maze -> Char -> Bool
-symbolExists maze symbol = any (elem symbol) maze
+-- Check if a tile exists in maze
+tileExists :: Maze -> Tile -> Bool
+tileExists maze tile =
+    any (elem tile) maze
 
--- Replace a char in maze
-replaceAt :: Pos -> Char -> Maze -> Maze
-replaceAt (y, x) newChar maze =
+-- Replace a tile in maze
+replaceAt :: Pos -> Tile -> Maze -> Maze
+replaceAt (y, x) newTile maze =
     case splitAt y maze of
         (above, row:below) ->
-            above ++ replaceChar x newChar row : below
-        _ -> maze    -- y out of bounds
+            above ++ replaceTile x newTile row : below
+        _ -> maze   -- y out of bounds
 
--- Replace a char in a row
-replaceChar :: Int -> Char -> String -> String
-replaceChar x newChar row =
+-- Replace a tile in a row
+replaceTile :: Int -> Tile -> [Tile] -> [Tile]
+replaceTile x newTile row =
     case splitAt x row of
         (before, _:after) ->
-            before ++ newChar : after
+            before ++ newTile : after
         _ -> row
 
 -- Move player from old to new position
-movePlayer :: Pos -> Pos -> Maze -> Char -> Maze
-movePlayer oldPos newPos maze symbol =
-    let mazeWithoutPlayer = replaceAt oldPos ' ' maze
-    in replaceAt newPos symbol mazeWithoutPlayer
+movePlayer :: Pos -> Pos -> Maze -> Maze
+movePlayer oldPos newPos maze =
+    let mazeWithoutPlayer = replaceAt oldPos Empty maze
+    in replaceAt newPos Player mazeWithoutPlayer
 
 -- Handle movement key presses
 handleMove :: Maze -> Char -> Maze
 handleMove maze key =
-    let oldPos = getPos '&' maze
+    let oldPos = getPos Player maze
         newPos = tryNewPos key oldPos
     in if isValidPos maze newPos
-        then movePlayer oldPos newPos maze '&'
+        then movePlayer oldPos newPos maze
         else maze
 
 -- Calculate timelapse
@@ -129,7 +154,7 @@ loop maze name startTime = do
     clearScreen
     printMaze newMaze
 
-    if symbolExists newMaze 'E'
+    if tileExists newMaze Exit
         then loop newMaze name startTime
         else handleWin name startTime
 
