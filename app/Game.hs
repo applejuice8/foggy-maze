@@ -140,7 +140,9 @@ playGame name = do
     hSetEcho stdin False    -- Don't print key entered
 
     startTime <- getCurrentTime
-
-    putStrLn "Press keys (q to quit):"
     printMaze initialMaze
     loop initialMaze name startTime
+
+    -- Restore terminal state
+    hSetEcho stdin True
+    hSetBuffering stdin LineBuffering
