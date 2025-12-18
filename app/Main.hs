@@ -40,15 +40,15 @@ process choice = case choice of
         let file = "app/scores.csv"
         scores <- readScores file
         putStrLn "\n========= Top 5 Scores ========="
-        mapM_ print (topScores 5 scores)
+        mapM_ print $ topScores 5 scores
         main
 
-    "3" -> do
-        putStrLn "\n========= How to Play? ========="
-        putStrLn "- Find the exit (E) in the maze"
-        putStrLn "- Use the WASD keys to move"
-        putStrLn "- Can only see 5x5 area around player"
-        putStrLn "- Score is based on time taken"
+    "3" -> 
+        putStrLn "\n========= How to Play? =========" <>
+        putStrLn "- Find the exit (E) in the maze" <>
+        putStrLn "- Use the WASD keys to move" <>
+        putStrLn "- Can only see 5x5 area around player" <>
+        putStrLn "- Score is based on time taken" <>
         main
 
     "4" -> do

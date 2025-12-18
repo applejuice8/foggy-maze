@@ -35,13 +35,6 @@ charToTile 'P' = Player
 charToTile '?' = Unknown
 charToTile _   = Empty
 
-tileToColoredChar :: Tile -> ColoredChar
-tileToColoredChar Wall    = colorCode White  ++ "#" ++ colorCode Reset
-tileToColoredChar Exit    = colorCode Green  ++ "E" ++ colorCode Reset
-tileToColoredChar Player  = colorCode Yellow ++ "P" ++ colorCode Reset
-tileToColoredChar Unknown = colorCode Gray   ++ "?" ++ colorCode Reset
-tileToColoredChar _       = " "
-
 -- ANSI escape codes
 colorCode :: Color -> String
 colorCode Green  = "\ESC[92m"
@@ -49,6 +42,13 @@ colorCode Yellow = "\ESC[93m"
 colorCode White  = "\ESC[37m"
 colorCode Gray   = "\ESC[90m"
 colorCode Reset  = "\ESC[0m"
+
+tileToColoredChar :: Tile -> ColoredChar
+tileToColoredChar Wall    = colorCode White  ++ "#" ++ colorCode Reset
+tileToColoredChar Exit    = colorCode Green  ++ "E" ++ colorCode Reset
+tileToColoredChar Player  = colorCode Yellow ++ "P" ++ colorCode Reset
+tileToColoredChar Unknown = colorCode Gray   ++ "?" ++ colorCode Reset
+tileToColoredChar _       = " "
 
 -- Maze template
 initialMaze :: Maze
@@ -81,8 +81,8 @@ printRow (py, px) (y, row) =
         render x tile =
             tileToColoredChar $
                 if abs (y - py) <= 2 && abs (x - px) <= 2
-                then tile
-                else Unknown
+                    then tile
+                    else Unknown
 
 -- Find col in a row recursively
 getColIndex :: Tile -> [Tile] -> Int -> Int
@@ -124,7 +124,7 @@ isValidPos maze (y, x) =
         maze !! y !! x /= Wall
     where
         rows = length maze
-        cols = length (head maze)
+        cols = length $ head maze
 
 -- Check if a tile exists in maze
 tileExists :: Maze -> Tile -> Bool
@@ -165,7 +165,7 @@ handleMove maze key =
 -- Calculate timelapse
 calcTimelapse :: UTCTime -> UTCTime -> Double
 calcTimelapse start end =
-    realToFrac (diffUTCTime end start)
+    realToFrac $ diffUTCTime end start
 
 -- Run when win
 handleWin :: Name -> UTCTime -> IO ()
@@ -176,7 +176,7 @@ handleWin name startTime = do
         score = Score name time
 
     putStrLn "You escaped!"
-    putStrLn ("Time taken: " ++ show time ++ " seconds")
+    putStrLn $ "Time taken: " ++ show time ++ " seconds"
     writeScore file score
 
 -- Game loop

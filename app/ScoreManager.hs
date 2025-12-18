@@ -44,12 +44,12 @@ readCSV file = do
 
 -- Check if a row is empty
 isEmptyRow :: Row -> Bool
-isEmptyRow [] = True
+isEmptyRow []     = True
 isEmptyRow fields = all null fields
 
 -- Filter empty rows
 cleanRows :: [Row] -> [Row]
-cleanRows = filter (not . isEmptyRow)
+cleanRows = filter $ not . isEmptyRow
 
 -- Write scores to csv file
 writeScore :: FilePath -> Score -> IO ()
@@ -57,13 +57,13 @@ writeScore file score = do
     rows <- readCSV file
     let validRows = cleanRows rows
         newRows   = validRows ++ [scoreToRow score]
-    writeFile file (printCSV newRows)
+    writeFile file $ printCSV newRows
 
 -- Read scores from csv file
 readScores :: FilePath -> IO [Score]
 readScores file = do
     rows <- readCSV file
-    return (mapMaybe rowToScore rows)
+    return $ mapMaybe rowToScore rows
 
 -- Take top n scores
 topScores :: Int -> [Score] -> [Score]
