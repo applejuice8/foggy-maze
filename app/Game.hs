@@ -11,43 +11,37 @@ type Maze = [[Tile]]
 type Pos = (Int, Int)   -- (x, y)
 type ColoredChar = String
 
-data Tile
-    = Wall
-    | Exit
-    | Player
-    | Unknown
-    | Empty
-    deriving (Eq)
+data Tile = Wall | Exit | Player | Unknown | Empty
+            deriving (Eq)
 
-data Color
-    = Green 
-    | Yellow 
-    | White 
-    | Gray 
-    | Reset
+data Color = Green | Yellow | White | Gray | Reset
 
 -- Data types conversion
 charToTile :: Char -> Tile
-charToTile '#' = Wall
-charToTile 'E' = Exit
-charToTile 'P' = Player
-charToTile '?' = Unknown
-charToTile _   = Empty
+charToTile c = case c of
+    '#' -> Wall
+    'E' -> Exit
+    'P' -> Player
+    '?' -> Unknown
+    _   -> Empty
 
 -- ANSI escape codes
 colorCode :: Color -> String
-colorCode Green  = "\ESC[92m"
-colorCode Yellow = "\ESC[93m"
-colorCode White  = "\ESC[37m"
-colorCode Gray   = "\ESC[90m"
-colorCode _      = "\ESC[0m"
+colorCode c = case c of
+    Green  -> "\ESC[92m"
+    Yellow -> "\ESC[93m"
+    White  -> "\ESC[37m"
+    Gray   -> "\ESC[90m"
+    _      -> "\ESC[0m"
 
 tileToColoredChar :: Tile -> ColoredChar
-tileToColoredChar Wall    = colorCode White  ++ "#" ++ colorCode Reset
-tileToColoredChar Exit    = colorCode Green  ++ "E" ++ colorCode Reset
-tileToColoredChar Player  = colorCode Yellow ++ "P" ++ colorCode Reset
-tileToColoredChar Unknown = colorCode Gray   ++ "?" ++ colorCode Reset
-tileToColoredChar _       = " "
+tileToColoredChar t = case t of
+        Wall    -> color White  "#"
+        Exit    -> color Green  "E" 
+        Player  -> color Yellow "P"
+        Unknown -> color Gray   "?"
+        _       -> " "
+    where color c s = colorCode c ++ s ++ colorCode Reset
 
 -- Maze template
 initialMaze :: Maze
