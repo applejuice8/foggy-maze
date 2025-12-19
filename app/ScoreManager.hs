@@ -1,5 +1,5 @@
 module ScoreManager
-    ( Score(..), writeScore     -- Game.hs
+    ( Name, Score(..), writeScore     -- Game.hs
     , readScores, topScores     -- Main.hs
     ) where
 

@@ -1,13 +1,12 @@
-module Game (Name, playGame) where
+module Game (playGame) where
 
 import System.IO
 import Data.Char (toUpper)
 import System.Console.ANSI (clearScreen)
 import Data.Time.Clock (UTCTime, diffUTCTime, getCurrentTime)
-import ScoreManager (Score(..), writeScore)
+import ScoreManager (Name, Score(..), writeScore)
 
 -- Custom data types
-type Name = String
 type Maze = [[Tile]]
 type Pos = (Int, Int)   -- (x, y)
 type ColoredChar = String
@@ -41,7 +40,7 @@ colorCode Green  = "\ESC[92m"
 colorCode Yellow = "\ESC[93m"
 colorCode White  = "\ESC[37m"
 colorCode Gray   = "\ESC[90m"
-colorCode Reset  = "\ESC[0m"
+colorCode _      = "\ESC[0m"
 
 tileToColoredChar :: Tile -> ColoredChar
 tileToColoredChar Wall    = colorCode White  ++ "#" ++ colorCode Reset
@@ -84,12 +83,13 @@ printRow (py, px) (y, row) =
                     then tile
                     else Unknown
 
--- Find col in a row recursively
-getColIndex :: Tile -> [Tile] -> Int -> Int
-getColIndex _ [] _ = error "Tile not found in row"
-getColIndex tile (col:cols) x
-    | col == tile = x
-    | otherwise   = getColIndex tile cols (x + 1)
+-- Combine (row, col)
+getPos :: Tile -> Maze -> Pos
+getPos tile maze =
+        (row, col)
+    where
+        row = getRowIndex tile maze 0
+        col = getColIndex tile (maze !! row) 0
 
 -- Find row in maze recursively
 getRowIndex :: Tile -> Maze -> Int -> Int
@@ -98,13 +98,21 @@ getRowIndex tile (row:rows) y
     | tile `elem` row = y
     | otherwise       = getRowIndex tile rows (y + 1)
 
--- Combine (row, col)
-getPos :: Tile -> Maze -> Pos
-getPos tile maze =
-        (row, col)
-    where
-        row = getRowIndex tile maze 0
-        col = getColIndex tile (maze !! row) 0
+-- Find col in a row recursively
+getColIndex :: Tile -> [Tile] -> Int -> Int
+getColIndex _ [] _ = error "Tile not found in row"
+getColIndex tile (col:cols) x
+    | col == tile = x
+    | otherwise   = getColIndex tile cols (x + 1)
+
+-- Handle movement key presses
+handleMove :: Maze -> Char -> Maze
+handleMove maze key =
+    let oldPos = getPos Player maze
+        newPos = tryNewPos key oldPos
+    in if isValidPos maze newPos
+        then movePlayer oldPos newPos maze
+        else maze
 
 -- Top, Left, Bottom, Right
 tryNewPos :: Char -> Pos -> Pos
@@ -126,10 +134,11 @@ isValidPos maze (y, x) =
         rows = length maze
         cols = length $ head maze
 
--- Check if a tile exists in maze
-tileExists :: Maze -> Tile -> Bool
-tileExists maze tile =
-    any (elem tile) maze
+-- Move player from old to new position
+movePlayer :: Pos -> Pos -> Maze -> Maze
+movePlayer oldPos newPos maze =
+    let mazeWithoutPlayer = replaceAt oldPos Empty maze
+    in replaceAt newPos Player mazeWithoutPlayer
 
 -- Replace a tile in maze
 replaceAt :: Pos -> Tile -> Maze -> Maze
@@ -147,25 +156,10 @@ replaceTile x newTile row =
             before ++ newTile : after
         _ -> row
 
--- Move player from old to new position
-movePlayer :: Pos -> Pos -> Maze -> Maze
-movePlayer oldPos newPos maze =
-    let mazeWithoutPlayer = replaceAt oldPos Empty maze
-    in replaceAt newPos Player mazeWithoutPlayer
-
--- Handle movement key presses
-handleMove :: Maze -> Char -> Maze
-handleMove maze key =
-    let oldPos = getPos Player maze
-        newPos = tryNewPos key oldPos
-    in if isValidPos maze newPos
-        then movePlayer oldPos newPos maze
-        else maze
-
--- Calculate timelapse
-calcTimelapse :: UTCTime -> UTCTime -> Double
-calcTimelapse start end =
-    realToFrac $ diffUTCTime end start
+-- Check if a tile exists in maze
+tileExists :: Maze -> Tile -> Bool
+tileExists maze tile =
+    any (elem tile) maze
 
 -- Run when win
 handleWin :: Name -> UTCTime -> IO ()
@@ -178,6 +172,11 @@ handleWin name startTime = do
     putStrLn "You escaped!"
     putStrLn $ "Time taken: " ++ show time ++ " seconds"
     writeScore file score
+
+-- Calculate timelapse
+calcTimelapse :: UTCTime -> UTCTime -> Double
+calcTimelapse start end =
+    realToFrac $ diffUTCTime end start
 
 -- Game loop
 loop :: Maze -> Name -> UTCTime  -> IO ()

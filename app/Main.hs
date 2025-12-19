@@ -1,7 +1,7 @@
 module Main where
 
-import Game (Name, playGame)
-import ScoreManager (readScores, topScores)
+import Game (playGame)
+import ScoreManager (Name, readScores, topScores)
 
 -- Show menu
 menu :: IO ()
