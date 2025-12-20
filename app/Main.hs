@@ -19,29 +19,29 @@ menu =
 
 -- Prompt name
 promptName :: IO Name
-promptName = do
-    putStrLn "Enter name: "
-    name <- getLine
-    if null name
-        then do
-            putStrLn "Invalid name. Please try again."
-            promptName
-        else return name
+promptName =
+    putStrLn "Enter name: " >>
+    getLine >>= \name ->
+        if null name
+            then
+                putStrLn "Invalid name. Please try again." >>
+                promptName
+            else return name
 
 -- Process menu selection
 process :: String -> IO ()
 process choice = case choice of
-    "1" -> do
-        name <- promptName
-        playGame name
+    "1" ->
+        promptName >>= \name ->
+        playGame name >>
         main
 
-    "2" -> do
+    "2" ->
         let file = "app/scores.csv"
-        scores <- readScores file
-        putStrLn "\n========= Top 5 Scores ========="
-        mapM_ print $ topScores 5 scores
-        main
+        in readScores file >>= \scores ->
+            putStrLn "\n========= Top 5 Scores =========" >>
+            mapM_ print (topScores 5 scores) >>
+            main
 
     "3" -> 
         putStrLn "\n========= How to Play? =========" <>
@@ -51,25 +51,26 @@ process choice = case choice of
         putStrLn "- Score is based on time taken" <>
         main
 
-    "4" -> do
-        putStrLn "Are you sure? (y/n): "
-        confirm <- getLine
-        if confirm == "y"
-            then do
-                writeFile "app/scores.csv" ""
-                putStrLn "Scores reset!"
-            else putStrLn "Cancelled"
-        main
+    "4" ->
+        putStrLn "Are you sure? (y/n): " >>
+        getLine >>= \confirm ->
+            (if confirm == "y"
+                then
+                    writeFile "app/scores.csv" "" >>
+                    putStrLn "Scores reset!"
+                else putStrLn "Cancelled"
+            ) >>
+            main
 
     "5" -> putStrLn "Thanks for playing!"
 
-    _   -> do
-        putStrLn "Invalid choice. Please try again."
+    _   ->
+        putStrLn "Invalid choice. Please try again." >>
         main
 
 -- Main function
 main :: IO ()
-main = do
-    menu
-    choice <- getLine
+main = 
+    menu >>
+    getLine >>= \choice ->
     process choice
