@@ -1,5 +1,6 @@
 module Main where
 
+import Text.Read (readMaybe)
 import Config (scoresFile)
 import Game (playGame)
 import ScoreManager (Name, readScores, topScores)
@@ -29,12 +30,29 @@ promptName =
                 promptName
             else return name
 
+promptDiff :: IO Int
+promptDiff = 
+    putStrLn "\nSelect difficulty: " <>
+    putStrLn "1. Easy (9x9 tiles)" <>
+    putStrLn "2. Medium (7x7 tiles)" <>
+    putStrLn "3. Hard (5x5 tiles)" <>
+    putStrLn "4. Insane (3x3 tiles)" <>
+    putStrLn "Your choice: " >>
+    getLine >>= \input ->
+        case readMaybe input of
+            Just 1 -> return 4      -- Easy
+            Just 2 -> return 3      -- Medium
+            Just 3 -> return 2      -- Hard
+            Just 4 -> return 1      -- Insane
+            _      -> putStrLn "Invalid choice. Please enter 1, 2, 3 or 4." >> promptDiff
+
 -- Process menu selection
 process :: String -> IO ()
 process choice = case choice of
     "1" ->
         promptName >>= \name ->
-            playGame name >>
+            promptDiff >>= \diff ->
+                playGame name diff >>
         main
 
     "2" ->

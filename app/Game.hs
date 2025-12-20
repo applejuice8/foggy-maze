@@ -64,13 +64,13 @@ initialMaze =
         ]
 
 -- Print maze
-printMaze :: Maze -> Pos -> IO ()
-printMaze maze (py, px) =
+printMaze :: Maze -> Pos -> Int -> IO ()
+printMaze maze (py, px) size =
     putStrLn "Use WASD keys to find the exit" >>
     mapM_ putStrLn
         [ concat
             [ tileToColoredChar $
-                if abs (y - py) <= 2 && abs (x - px) <= 2
+                if abs (y - py) <= size && abs (x - px) <= size
                     then tile
                     else Unknown
             | (x, tile) <- zip [0..] row
@@ -148,20 +148,20 @@ calcTimelapse start end =
     realToFrac $ diffUTCTime end start
 
 -- Game loop
-loop :: Maze -> Name -> UTCTime  -> IO ()
-loop maze name startTime =
+loop :: Maze -> Name -> Int -> UTCTime  -> IO ()
+loop maze name size startTime =
     getChar >>= \key ->
         clearScreen >>
         let newMaze   = handleMove maze key
             playerPos = getPos Player newMaze
-        in printMaze newMaze playerPos >>
+        in printMaze newMaze playerPos size >>
 
         if Exit `notElem` concat newMaze
             then handleWin name startTime
-            else loop newMaze name startTime
+            else loop newMaze name size startTime
 
-playGame :: Name -> IO ()
-playGame name =
+playGame :: Name -> Int -> IO ()
+playGame name size =
     hSetBuffering stdin NoBuffering >>      -- Disable buffering (Key read immediately)
     hSetEcho stdin False >>     -- Don't print key entered
 
@@ -169,8 +169,8 @@ playGame name =
     getCurrentTime >>= \startTime ->
         let playerPos = getPos Player initialMaze
         in
-            printMaze initialMaze playerPos >>
-            loop initialMaze name startTime >>
+            printMaze initialMaze playerPos size >>
+            loop initialMaze name size startTime >>
 
     -- Restore terminal state
     hSetBuffering stdin LineBuffering >>
