@@ -1,5 +1,6 @@
 module Main where
 
+import Config (scoresFile)
 import Game (playGame)
 import ScoreManager (Name, readScores, topScores)
 
@@ -33,15 +34,14 @@ process :: String -> IO ()
 process choice = case choice of
     "1" ->
         promptName >>= \name ->
-        playGame name >>
+            playGame name >>
         main
 
     "2" ->
-        let file = "app/scores.csv"
-        in readScores file >>= \scores ->
+        readScores scoresFile >>= \scores ->
             putStrLn "\n========= Top 5 Scores =========" >>
             mapM_ print (topScores 5 scores) >>
-            main
+        main
 
     "3" -> 
         putStrLn "\n========= How to Play? =========" <>
@@ -56,11 +56,11 @@ process choice = case choice of
         getLine >>= \confirm ->
             (if confirm == "y"
                 then
-                    writeFile "app/scores.csv" "" >>
+                    writeFile scoresFile "" >>
                     putStrLn "Scores reset!"
                 else putStrLn "Cancelled"
             ) >>
-            main
+        main
 
     "5" -> putStrLn "Thanks for playing!"
 
@@ -73,4 +73,4 @@ main :: IO ()
 main = 
     menu >>
     getLine >>= \choice ->
-    process choice
+        process choice

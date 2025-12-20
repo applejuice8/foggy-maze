@@ -6,6 +6,7 @@ import System.IO
 import Data.Char (toUpper)
 import System.Console.ANSI (clearScreen)
 import Data.Time.Clock (UTCTime, diffUTCTime, getCurrentTime)
+import Config (scoresFile)
 import ScoreManager (Name, Score(..), writeScore)
 
 -- Custom data types
@@ -139,7 +140,7 @@ handleWin name startTime =
         in
             putStrLn "You escaped!" >>
             putStrLn ("Time taken: " ++ show time ++ " seconds") >>
-            writeScore "app/scores.csv" score
+            writeScore scoresFile score
 
 -- Calculate timelapse
 calcTimelapse :: UTCTime -> UTCTime -> Double
