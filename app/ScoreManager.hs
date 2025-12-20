@@ -1,3 +1,5 @@
+{-# LANGUAGE LambdaCase #-}     -- For lambda case
+
 module ScoreManager
     ( Name, Score(..), writeScore     -- Game.hs
     , readScores, topScores     -- Main.hs
@@ -25,22 +27,21 @@ scoreToRow (Score name time) =
     [name, show time]
 
 rowToScore :: Row -> Maybe Score
-rowToScore [name, timeStr] = do
-    secs <- readMaybe timeStr
+rowToScore [name, timeStr] =
+    readMaybe timeStr >>= \secs ->
     Just (Score name secs)
 rowToScore _ = Nothing
 
 -- Read csv file if exist
 readCSV :: FilePath -> IO [Row]
-readCSV file = do
-    exists <- doesFileExist file
-    if not exists
-        then return []
-        else do
-            result <- parseCSVFromFile file
-            case result of
-                Right rows -> return rows
-                Left _     -> return []
+readCSV file =
+    doesFileExist file >>= \exists ->
+        if not exists
+            then return []
+            else
+                parseCSVFromFile file >>= \case
+                    Right rows -> return rows
+                    Left _     -> return []
 
 -- Check if a row is empty
 isEmptyRow :: Row -> Bool
@@ -53,17 +54,17 @@ cleanRows = filter $ not . isEmptyRow
 
 -- Write scores to csv file
 writeScore :: FilePath -> Score -> IO ()
-writeScore file score = do
-    rows <- readCSV file
-    let validRows = cleanRows rows
-        newRows   = validRows ++ [scoreToRow score]
-    writeFile file $ printCSV newRows
+writeScore file score =
+    readCSV file >>= \rows ->
+        let validRows = cleanRows rows
+            newRows   = validRows ++ [scoreToRow score]
+        in writeFile file $ printCSV newRows
 
 -- Read scores from csv file
 readScores :: FilePath -> IO [Score]
-readScores file = do
-    rows <- readCSV file
-    return $ mapMaybe rowToScore rows
+readScores file =
+    readCSV file >>= \rows ->
+        return $ mapMaybe rowToScore rows
 
 -- Take top n scores
 topScores :: Int -> [Score] -> [Score]
