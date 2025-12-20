@@ -62,42 +62,18 @@ initialMaze =
 
 -- Print maze
 printMaze :: Maze -> Pos -> IO ()
-printMaze maze playerPos = do
+printMaze maze (py, px) = do
     putStrLn "Use WASD keys to find the exit"
-    mapM_ (putStrLn . printRow playerPos) (zip [0..] maze)
-
--- Print a single row
-printRow :: Pos -> (Int, [Tile]) -> ColoredChar
-printRow (py, px) (y, row) =
-        concat $ zipWith render [0..] row
-    where
-        render x tile =
-            tileToColoredChar $
+    mapM_ putStrLn $
+        [ concat
+            [ tileToColoredChar $
                 if abs (y - py) <= 2 && abs (x - px) <= 2
                     then tile
                     else Unknown
-
--- Combine (row, col)
-getPos :: Tile -> Maze -> Pos
-getPos tile maze =
-        (row, col)
-    where
-        row = getRowIndex tile maze 0
-        col = getColIndex tile (maze !! row) 0
-
--- Find row in maze recursively
-getRowIndex :: Tile -> Maze -> Int -> Int
-getRowIndex _ [] _ = error "Tile not found in maze"
-getRowIndex tile (row:rows) y
-    | tile `elem` row = y
-    | otherwise       = getRowIndex tile rows (y + 1)
-
--- Find col in a row recursively
-getColIndex :: Tile -> [Tile] -> Int -> Int
-getColIndex _ [] _ = error "Tile not found in row"
-getColIndex tile (col:cols) x
-    | col == tile = x
-    | otherwise   = getColIndex tile cols (x + 1)
+            | (x, tile) <- zip [0..] row
+            ]
+        | (y, row) <- zip [0..] maze
+        ]
 
 -- Handle movement key presses
 handleMove :: Maze -> Char -> Maze
@@ -107,6 +83,16 @@ handleMove maze key =
     in if isValidPos maze newPos
         then movePlayer oldPos newPos maze
         else maze
+
+-- Get position of a tile in the maze
+getPos :: Tile -> Maze -> Pos
+getPos tile maze =
+    head
+        [ (y, x)
+        | (y, row) <- zip [0..] maze
+        , (x, t)   <- zip [0..] row
+        , t == tile
+        ]
 
 -- Top, Left, Bottom, Right
 tryNewPos :: Char -> Pos -> Pos
@@ -126,46 +112,32 @@ isValidPos maze (y, x) =
         maze !! y !! x /= Wall
     where
         rows = length maze
-        cols = length $ head maze
+        cols = length $ maze !! y
 
 -- Move player from old to new position
 movePlayer :: Pos -> Pos -> Maze -> Maze
-movePlayer oldPos newPos maze =
-    let mazeWithoutPlayer = replaceAt oldPos Empty maze
-    in replaceAt newPos Player mazeWithoutPlayer
+movePlayer oldPos newPos =
+    replaceAt newPos Player . replaceAt oldPos Empty
 
 -- Replace a tile in maze
 replaceAt :: Pos -> Tile -> Maze -> Maze
 replaceAt (y, x) newTile maze =
-    case splitAt y maze of
-        (above, row:below) ->
-            above ++ replaceTile x newTile row : below
-        _ -> maze   -- y out of bounds
-
--- Replace a tile in a row
-replaceTile :: Int -> Tile -> [Tile] -> [Tile]
-replaceTile x newTile row =
-    case splitAt x row of
-        (before, _:after) ->
-            before ++ newTile : after
-        _ -> row
-
--- Check if a tile exists in maze
-tileExists :: Maze -> Tile -> Bool
-tileExists maze tile =
-    any (elem tile) maze
+    [ [ if rowIdx == y && colIdx == x then newTile else tile
+      | (colIdx, tile) <- zip [0..] row
+      ]
+    | (rowIdx, row) <- zip [0..] maze
+    ]
 
 -- Run when win
 handleWin :: Name -> UTCTime -> IO ()
 handleWin name startTime = do
     endTime <- getCurrentTime
     let time  = calcTimelapse startTime endTime
-        file  = "app/scores.csv"
         score = Score name time
 
     putStrLn "You escaped!"
     putStrLn $ "Time taken: " ++ show time ++ " seconds"
-    writeScore file score
+    writeScore "app/scores.csv" score
 
 -- Calculate timelapse
 calcTimelapse :: UTCTime -> UTCTime -> Double
@@ -181,9 +153,9 @@ loop maze name startTime = do
         playerPos = getPos Player newMaze
     printMaze newMaze playerPos
 
-    if tileExists newMaze Exit
-        then loop newMaze name startTime
-        else handleWin name startTime
+    if Exit `notElem` concat newMaze
+        then handleWin name startTime
+        else loop newMaze name startTime
 
 playGame :: Name -> IO ()
 playGame name = do
@@ -194,7 +166,6 @@ playGame name = do
     startTime <- getCurrentTime
     let playerPos = getPos Player initialMaze
     printMaze initialMaze playerPos
-
     loop initialMaze name startTime
 
     -- Restore terminal state
