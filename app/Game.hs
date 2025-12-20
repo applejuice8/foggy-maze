@@ -1,3 +1,5 @@
+{-# LANGUAGE LambdaCase #-}     -- For lambda case
+
 module Game (playGame) where
 
 import System.IO
@@ -18,7 +20,7 @@ data Color = Green | Yellow | White | Gray | Reset
 
 -- Data types conversion
 charToTile :: Char -> Tile
-charToTile c = case c of
+charToTile = \case
     '#' -> Wall
     'E' -> Exit
     'P' -> Player
@@ -27,7 +29,7 @@ charToTile c = case c of
 
 -- ANSI escape codes
 colorCode :: Color -> String
-colorCode c = case c of
+colorCode = \case
     Green  -> "\ESC[92m"
     Yellow -> "\ESC[93m"
     White  -> "\ESC[37m"
@@ -35,7 +37,7 @@ colorCode c = case c of
     _      -> "\ESC[0m"
 
 tileToColoredChar :: Tile -> ColoredChar
-tileToColoredChar t = case t of
+tileToColoredChar = \case
         Wall    -> color White  "#"
         Exit    -> color Green  "E" 
         Player  -> color Yellow "P"
@@ -62,9 +64,9 @@ initialMaze =
 
 -- Print maze
 printMaze :: Maze -> Pos -> IO ()
-printMaze maze (py, px) = do
-    putStrLn "Use WASD keys to find the exit"
-    mapM_ putStrLn $
+printMaze maze (py, px) =
+    putStrLn "Use WASD keys to find the exit" >>
+    mapM_ putStrLn
         [ concat
             [ tileToColoredChar $
                 if abs (y - py) <= 2 && abs (x - px) <= 2
@@ -130,14 +132,14 @@ replaceAt (y, x) newTile maze =
 
 -- Run when win
 handleWin :: Name -> UTCTime -> IO ()
-handleWin name startTime = do
-    endTime <- getCurrentTime
-    let time  = calcTimelapse startTime endTime
-        score = Score name time
-
-    putStrLn "You escaped!"
-    putStrLn $ "Time taken: " ++ show time ++ " seconds"
-    writeScore "app/scores.csv" score
+handleWin name startTime =
+    getCurrentTime >>= \endTime ->
+        let time  = calcTimelapse startTime endTime
+            score = Score name time
+        in
+            putStrLn "You escaped!" >>
+            putStrLn ("Time taken: " ++ show time ++ " seconds") >>
+            writeScore "app/scores.csv" score
 
 -- Calculate timelapse
 calcTimelapse :: UTCTime -> UTCTime -> Double
@@ -146,28 +148,29 @@ calcTimelapse start end =
 
 -- Game loop
 loop :: Maze -> Name -> UTCTime  -> IO ()
-loop maze name startTime = do
-    key <- getChar
-    clearScreen
-    let newMaze   = handleMove maze key
-        playerPos = getPos Player newMaze
-    printMaze newMaze playerPos
+loop maze name startTime =
+    getChar >>= \key ->
+        clearScreen >>
+        let newMaze   = handleMove maze key
+            playerPos = getPos Player newMaze
+        in printMaze newMaze playerPos >>
 
-    if Exit `notElem` concat newMaze
-        then handleWin name startTime
-        else loop newMaze name startTime
+        if Exit `notElem` concat newMaze
+            then handleWin name startTime
+            else loop newMaze name startTime
 
 playGame :: Name -> IO ()
-playGame name = do
-    hSetBuffering stdin NoBuffering     -- Disable buffering (Key read immediately)
-    hSetEcho stdin False    -- Don't print key entered
+playGame name =
+    hSetBuffering stdin NoBuffering >>      -- Disable buffering (Key read immediately)
+    hSetEcho stdin False >>     -- Don't print key entered
 
-    clearScreen
-    startTime <- getCurrentTime
-    let playerPos = getPos Player initialMaze
-    printMaze initialMaze playerPos
-    loop initialMaze name startTime
+    clearScreen >>
+    getCurrentTime >>= \startTime ->
+        let playerPos = getPos Player initialMaze
+        in
+            printMaze initialMaze playerPos >>
+            loop initialMaze name startTime >>
 
     -- Restore terminal state
-    hSetBuffering stdin LineBuffering
+    hSetBuffering stdin LineBuffering >>
     hSetEcho stdin True
