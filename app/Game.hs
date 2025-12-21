@@ -6,7 +6,6 @@ import System.IO
 import Data.Char (toUpper)
 import System.Console.ANSI (clearScreen)
 import Data.Time.Clock (UTCTime, diffUTCTime, getCurrentTime)
-import Control.Monad.State (StateT, get, put, modify, gets, liftIO, runStateT)
 import Config (scoresFile)
 import ScoreManager (Name, Difficulty(..), Score(..), writeScore)
 
@@ -19,32 +18,6 @@ data Tile = Wall | Exit | Player | Unknown | Empty
             deriving (Eq)
 
 data Color = Green | Yellow | White | Gray | Reset
-
-data GameState = GameState
-    { gameMaze :: Maze
-    , gameStartTime :: UTCTime
-    , gamePlayerName :: Name
-    , gameDifficulty :: Difficulty
-    }
-
--- Game loop as a state monad
-type Game = StateT GameState IO
-
--- Helper functions to access state
-getMaze :: Game Maze
-getMaze = gets gameMaze
-
-getStartTime :: Game UTCTime
-getStartTime = gets gameStartTime
-
-getPlayerName :: Game Name
-getPlayerName = gets gamePlayerName
-
-getDifficulty :: Game Difficulty
-getDifficulty = gets gameDifficulty
-
-updateMaze :: Maze -> Game ()
-updateMaze newMaze = modify (\s -> s { gameMaze = newMaze })
 
 -- Data types conversion
 charToTile :: Char -> Tile
@@ -185,7 +158,7 @@ calcTimelapse start end =
     realToFrac $ diffUTCTime end start
 
 -- Game loop
-loop :: Maze -> Name -> Difficulty -> UTCTime  -> IO ()
+loop :: Maze -> Name -> Difficulty -> UTCTime -> IO ()
 loop maze name diff startTime =
     getChar >>= \key ->
         clearScreen >>
@@ -197,30 +170,6 @@ loop maze name diff startTime =
             then handleWin name diff startTime
             else loop newMaze name diff startTime
 
-gameLoop :: Game ()
-gameLoop =
-    -- Get current state
-    getMaze >>= \maze ->
-    getDifficulty >>= \diff ->
-    let pos = getPos Player maze
-    in liftIO (printMaze maze pos diff) >>
-
-    -- Get input and update
-    liftIO getChar >>= \key ->
-    liftIO clearScreen >>
-    
-    let newMaze = handleMove maze key
-    in updateMaze newMaze >>
-
-    -- Check win condition
-    (if Exit `notElem` concat newMaze
-        then
-            getPlayerName >>= \name ->
-            getDifficulty >>= \diff ->
-            getStartTime >>= \start ->
-            liftIO $ handleWin name diff start
-        else gameLoop)
-
 playGame :: Name -> Difficulty -> IO ()
 playGame name diff =
     hSetBuffering stdin NoBuffering >>      -- Disable buffering (Key read immediately)
@@ -228,13 +177,10 @@ playGame name diff =
 
     clearScreen >>
     getCurrentTime >>= \startTime ->
-        let initialState = GameState
-                { gameMaze = initialMaze
-                , gameStartTime = startTime
-                , gamePlayerName = name
-                , gameDifficulty = diff
-                }
-        in runStateT gameLoop initialState >>
+        let playerPos = getPos Player initialMaze
+        in
+            printMaze initialMaze playerPos diff >>
+            loop initialMaze name diff startTime >>
 
     -- Restore terminal state
     hSetBuffering stdin LineBuffering >>
