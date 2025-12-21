@@ -19,6 +19,14 @@ data Tile = Wall | Exit | Player | Unknown | Empty
 
 data Color = Green | Yellow | White | Gray | Reset
 
+data GameState = GameState
+    { gsMaze :: Maze
+    , gsName :: Name
+    , gsDiff :: Difficulty
+    , gsStartTime :: UTCTime
+    , gsPos :: Pos
+    }
+
 -- Data types conversion
 charToTile :: Char -> Tile
 charToTile = \case
@@ -72,21 +80,24 @@ initialMaze =
         ]
 
 -- Print maze
-printMaze :: Maze -> Pos -> Difficulty -> IO ()
-printMaze maze (py, px) diff =
+printMaze :: GameState -> IO ()
+printMaze gs =
     putStrLn "Use WASD keys to find the exit" >>
-    let size = diffToSize diff
-    in
-        mapM_ putStrLn
-            [ concat
-                [ tileToColoredChar $
-                    if abs (y - py) <= size && abs (x - px) <= size
-                        then tile
-                        else Unknown
-                | (x, tile) <- zip [0..] row
-                ]
-            | (y, row) <- zip [0..] maze
+
+    let maze = gsMaze gs
+        (py, px) = gsPos gs
+        size = diffToSize $ gsDiff gs
+
+    in mapM_ putStrLn
+        [ concat
+            [ tileToColoredChar $
+                if abs (y - py) <= size && abs (x - px) <= size
+                    then tile
+                    else Unknown
+            | (x, tile) <- zip [0..] row
             ]
+        | (y, row) <- zip [0..] maze
+        ]
 
 -- Handle movement key presses
 handleMove :: Maze -> Char -> Maze
@@ -142,11 +153,11 @@ replaceAt (y, x) newTile maze =
     ]
 
 -- Run when win
-handleWin :: Name -> Difficulty -> UTCTime -> IO ()
-handleWin name diff startTime =
+handleWin :: GameState -> IO ()
+handleWin gs =
     getCurrentTime >>= \endTime ->
-        let time  = calcTimelapse startTime endTime
-            score = Score name diff time
+        let time  = calcTimelapse (gsStartTime gs) endTime
+            score = Score (gsName gs) (gsDiff gs) time
         in
             putStrLn "You escaped!" >>
             putStrLn ("Time taken: " ++ show time ++ " seconds") >>
@@ -158,17 +169,21 @@ calcTimelapse start end =
     realToFrac $ diffUTCTime end start
 
 -- Game loop
-loop :: Maze -> Name -> Difficulty -> UTCTime -> IO ()
-loop maze name diff startTime =
+loop :: GameState -> IO ()
+loop gs =
     getChar >>= \key ->
         clearScreen >>
-        let newMaze   = handleMove maze key
-            playerPos = getPos Player newMaze
-        in printMaze newMaze playerPos diff >>
+        let newMaze = handleMove (gsMaze gs) key
+            newPos  = getPos Player newMaze
+            newGS = gs
+                    { gsMaze = newMaze
+                    , gsPos = newPos
+                    }
+        in printMaze newGS >>
 
         if Exit `notElem` concat newMaze
-            then handleWin name diff startTime
-            else loop newMaze name diff startTime
+            then handleWin newGS
+            else loop newGS
 
 playGame :: Name -> Difficulty -> IO ()
 playGame name diff =
@@ -177,10 +192,16 @@ playGame name diff =
 
     clearScreen >>
     getCurrentTime >>= \startTime ->
-        let playerPos = getPos Player initialMaze
+        let initialGS = GameState
+                { gsMaze = initialMaze
+                , gsName = name
+                , gsDiff = diff
+                , gsStartTime = startTime
+                , gsPos = getPos Player initialMaze
+                }
         in
-            printMaze initialMaze playerPos diff >>
-            loop initialMaze name diff startTime >>
+            printMaze initialGS >>
+            loop initialGS >>
 
     -- Restore terminal state
     hSetBuffering stdin LineBuffering >>
