@@ -1,8 +1,8 @@
 {-# LANGUAGE LambdaCase #-}     -- For lambda case
 
 module ScoreManager
-    ( Name, Score(..), writeScore     -- Game.hs
-    , readScores, topScores     -- Main.hs
+    ( Name, Difficulty(..), Score(..),
+    writeScore, readScores, topScores
     ) where
 
 import System.Directory (doesFileExist)
@@ -16,20 +16,25 @@ type Name    = String
 type Seconds = Double
 type Row     = [String]
 
+data Difficulty = Easy | Medium | Hard | Insane
+    deriving (Show, Read, Eq, Ord)
+
 data Score = Score
     { playerName :: Name
+    , difficulty :: Difficulty
     , timeTaken  :: Seconds
     } deriving (Show, Eq, Ord)
 
 -- Data types conversion
 scoreToRow :: Score -> Row
-scoreToRow (Score name time) =
-    [name, show time]
+scoreToRow (Score name diff time) =
+    [name, show diff, show time]
 
 rowToScore :: Row -> Maybe Score
-rowToScore [name, timeStr] =
-    readMaybe timeStr >>= \secs ->
-    Just (Score name secs)
+rowToScore [name, diffStr, timeStr] =
+    readMaybe diffStr >>= \diff ->
+    readMaybe timeStr >>= \time ->
+        return $ Score name diff time
 rowToScore _ = Nothing
 
 -- Read csv file if exist

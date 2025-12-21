@@ -1,9 +1,19 @@
+{-# LANGUAGE LambdaCase #-}     -- For lambda case
+
 module Main where
 
 import Text.Read (readMaybe)
 import Config (scoresFile)
 import Game (playGame)
-import ScoreManager (Name, readScores, topScores)
+import ScoreManager (Name, Difficulty(..), readScores, topScores)
+
+intToDiff :: Int -> Difficulty
+intToDiff = \case
+    1 -> Easy
+    2 -> Medium
+    3 -> Hard
+    4 -> Insane
+    _ -> Easy  -- default
 
 -- Show menu
 menu :: IO ()
@@ -30,7 +40,7 @@ promptName =
                 promptName
             else return name
 
-promptDiff :: IO Int
+promptDiff :: IO Difficulty
 promptDiff = 
     putStrLn "\nSelect difficulty: " <>
     putStrLn "1. Easy (9x9 tiles)" <>
@@ -39,12 +49,13 @@ promptDiff =
     putStrLn "4. Insane (3x3 tiles)" <>
     putStrLn "Your choice: " >>
     getLine >>= \input ->
-        case readMaybe input of
-            Just 1 -> return 4      -- Easy
-            Just 2 -> return 3      -- Medium
-            Just 3 -> return 2      -- Hard
-            Just 4 -> return 1      -- Insane
-            _      -> putStrLn "Invalid choice. Please enter 1, 2, 3 or 4." >> promptDiff
+        case readMaybe input :: Maybe Int of
+            Just 1 -> return Easy
+            Just 2 -> return Medium
+            Just 3 -> return Hard
+            Just 4 -> return Insane
+            _      -> putStrLn "Invalid choice. Please enter 1, 2, 3 or 4." >>
+                        promptDiff
 
 -- Process menu selection
 process :: String -> IO ()

@@ -7,7 +7,7 @@ import Data.Char (toUpper)
 import System.Console.ANSI (clearScreen)
 import Data.Time.Clock (UTCTime, diffUTCTime, getCurrentTime)
 import Config (scoresFile)
-import ScoreManager (Name, Score(..), writeScore)
+import ScoreManager (Name, Difficulty(..), Score(..), writeScore)
 
 -- Custom data types
 type Maze = [[Tile]]
@@ -27,6 +27,13 @@ charToTile = \case
     'P' -> Player
     '?' -> Unknown
     _   -> Empty
+
+diffToSize :: Difficulty -> Int
+diffToSize = \case
+    Easy   -> 4     -- 9x9 tiles
+    Medium -> 3     -- 7x7 tiles
+    Hard   -> 2     -- 5x5 tiles
+    Insane -> 1     -- 3x3 tiles
 
 -- ANSI escape codes
 colorCode :: Color -> String
@@ -64,19 +71,21 @@ initialMaze =
         ]
 
 -- Print maze
-printMaze :: Maze -> Pos -> Int -> IO ()
-printMaze maze (py, px) size =
+printMaze :: Maze -> Pos -> Difficulty -> IO ()
+printMaze maze (py, px) diff =
     putStrLn "Use WASD keys to find the exit" >>
-    mapM_ putStrLn
-        [ concat
-            [ tileToColoredChar $
-                if abs (y - py) <= size && abs (x - px) <= size
-                    then tile
-                    else Unknown
-            | (x, tile) <- zip [0..] row
+    let size = diffToSize diff
+    in
+        mapM_ putStrLn
+            [ concat
+                [ tileToColoredChar $
+                    if abs (y - py) <= size && abs (x - px) <= size
+                        then tile
+                        else Unknown
+                | (x, tile) <- zip [0..] row
+                ]
+            | (y, row) <- zip [0..] maze
             ]
-        | (y, row) <- zip [0..] maze
-        ]
 
 -- Handle movement key presses
 handleMove :: Maze -> Char -> Maze
@@ -132,11 +141,11 @@ replaceAt (y, x) newTile maze =
     ]
 
 -- Run when win
-handleWin :: Name -> UTCTime -> IO ()
-handleWin name startTime =
+handleWin :: Name -> Difficulty -> UTCTime -> IO ()
+handleWin name diff startTime =
     getCurrentTime >>= \endTime ->
         let time  = calcTimelapse startTime endTime
-            score = Score name time
+            score = Score name diff time
         in
             putStrLn "You escaped!" >>
             putStrLn ("Time taken: " ++ show time ++ " seconds") >>
@@ -148,20 +157,20 @@ calcTimelapse start end =
     realToFrac $ diffUTCTime end start
 
 -- Game loop
-loop :: Maze -> Name -> Int -> UTCTime  -> IO ()
-loop maze name size startTime =
+loop :: Maze -> Name -> Difficulty -> UTCTime  -> IO ()
+loop maze name diff startTime =
     getChar >>= \key ->
         clearScreen >>
         let newMaze   = handleMove maze key
             playerPos = getPos Player newMaze
-        in printMaze newMaze playerPos size >>
+        in printMaze newMaze playerPos diff >>
 
         if Exit `notElem` concat newMaze
-            then handleWin name startTime
-            else loop newMaze name size startTime
+            then handleWin name diff startTime
+            else loop newMaze name diff startTime
 
-playGame :: Name -> Int -> IO ()
-playGame name size =
+playGame :: Name -> Difficulty -> IO ()
+playGame name diff =
     hSetBuffering stdin NoBuffering >>      -- Disable buffering (Key read immediately)
     hSetEcho stdin False >>     -- Don't print key entered
 
@@ -169,8 +178,8 @@ playGame name size =
     getCurrentTime >>= \startTime ->
         let playerPos = getPos Player initialMaze
         in
-            printMaze initialMaze playerPos size >>
-            loop initialMaze name size startTime >>
+            printMaze initialMaze playerPos diff >>
+            loop initialMaze name diff startTime >>
 
     -- Restore terminal state
     hSetBuffering stdin LineBuffering >>
