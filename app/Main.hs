@@ -7,13 +7,14 @@ import Config (scoresFile)
 import Game (playGame)
 import ScoreManager (Name, Difficulty(..), readScores, topScores)
 
+-- Data types conversion
 intToDiff :: Int -> Difficulty
 intToDiff = \case
     1 -> Easy
     2 -> Medium
     3 -> Hard
     4 -> Insane
-    _ -> Easy  -- default
+    _ -> Easy   -- Default
 
 -- Show menu
 menu :: IO ()

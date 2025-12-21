@@ -74,7 +74,8 @@ executable Final-Assignment
                     ansi-terminal,
                     csv,
                     directory,
-                    time
+                    time,
+                    mtl
 
     -- Directories containing source files.
     hs-source-dirs:   app

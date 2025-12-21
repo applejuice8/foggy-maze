@@ -17,13 +17,13 @@ type Seconds = Double
 type Row     = [String]
 
 data Difficulty = Easy | Medium | Hard | Insane
-    deriving (Show, Read, Eq, Ord)
+    deriving (Show, Read)
 
 data Score = Score
     { playerName :: Name
     , difficulty :: Difficulty
     , timeTaken  :: Seconds
-    } deriving (Show, Eq, Ord)
+    } deriving Show
 
 -- Data types conversion
 scoreToRow :: Score -> Row
