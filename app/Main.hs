@@ -20,14 +20,14 @@ intToDiff = \case
 menu :: IO ()
 menu = 
     putStrLn "\n================================" <>
-    putStrLn "|    Maze Game - Fog of War    |" <>
-    putStrLn "================================" <>
-    putStrLn "| 1. Play game                 |" <>
-    putStrLn "| 2. View top scores           |" <>
-    putStrLn "| 3. How to play?              |" <>
-    putStrLn "| 4. Reset scores              |" <>
-    putStrLn "| 5. Exit                      |" <>
-    putStrLn "================================" <>
+    putStrLn "|    Maze Game - Fog of War    |"   <>
+    putStrLn "================================"   <>
+    putStrLn "| 1. Play game                 |"   <>
+    putStrLn "| 2. View top scores           |"   <>
+    putStrLn "| 3. How to play?              |"   <>
+    putStrLn "| 4. Reset scores              |"   <>
+    putStrLn "| 5. Exit                      |"   <>
+    putStrLn "================================"   <>
     putStrLn "Enter your choice: "
 
 -- Prompt inputs
@@ -44,9 +44,9 @@ promptName =
 promptDiff :: IO Difficulty
 promptDiff = 
     putStrLn "\nSelect difficulty: " <>
-    putStrLn "1. Easy (9x9 tiles)" <>
+    putStrLn "1. Easy (9x9 tiles)"   <>
     putStrLn "2. Medium (7x7 tiles)" <>
-    putStrLn "3. Hard (5x5 tiles)" <>
+    putStrLn "3. Hard (5x5 tiles)"   <>
     putStrLn "4. Insane (3x3 tiles)" <>
     putStrLn "Your choice: " >>
     getLine >>= \input ->
@@ -74,8 +74,8 @@ process :: String -> IO ()
 process choice = case choice of
     "1" ->
         promptName >>= \name ->
-            promptDiff >>= \diff ->
-                playGame name diff >>
+        promptDiff >>= \diff ->
+            playGame name diff >>
         main
 
     "2" ->
@@ -86,11 +86,11 @@ process choice = case choice of
         main
 
     "3" -> 
-        putStrLn "\n========= How to Play? =========" <>
-        putStrLn "- Find the exit (E) in the maze" <>
-        putStrLn "- Use the WASD keys to move" <>
+        putStrLn "\n========= How to Play? ========="    <>
+        putStrLn "- Find the exit (E) in the maze"       <>
+        putStrLn "- Use the WASD keys to move"           <>
         putStrLn "- Can only see 5x5 area around player" <>
-        putStrLn "- Score is based on time taken" <>
+        putStrLn "- Score is based on time taken"        <>
         main
 
     "4" ->

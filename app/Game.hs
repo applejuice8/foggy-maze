@@ -10,8 +10,8 @@ import Config (scoresFile)
 import ScoreManager (Name, Difficulty(..), Score(..), writeScore)
 
 -- Custom data types
-type Maze = [[Tile]]
-type Pos = (Int, Int)   -- (x, y)
+type Maze        = [[Tile]]
+type Pos         = (Int, Int)   -- (x, y)
 type ColoredChar = String
 
 data Tile = Wall | Exit | Player | Unknown | Empty
@@ -20,11 +20,11 @@ data Tile = Wall | Exit | Player | Unknown | Empty
 data Color = Green | Yellow | White | Gray | Reset
 
 data GameState = GameState
-    { gsMaze :: Maze
-    , gsName :: Name
-    , gsDiff :: Difficulty
+    { gsMaze      :: Maze
+    , gsName      :: Name
+    , gsDiff      :: Difficulty
     , gsStartTime :: UTCTime
-    , gsPos :: Pos
+    , gsPos       :: Pos
     }
 
 -- Data types conversion
@@ -84,9 +84,9 @@ printMaze :: GameState -> IO ()
 printMaze gs =
     putStrLn "Use WASD keys to find the exit" >>
 
-    let maze = gsMaze gs
+    let maze     = gsMaze gs
         (py, px) = gsPos gs
-        size = diffToSize $ gsDiff gs
+        size     = diffToSize $ gsDiff gs
 
     in mapM_ putStrLn
         [ concat
@@ -175,16 +175,17 @@ loop gs =
         clearScreen >>
         let newMaze = handleMove (gsMaze gs) key
             newPos  = getPos Player newMaze
-            newGS = gs
-                    { gsMaze = newMaze
-                    , gsPos = newPos
-                    }
+            newGS   = gs
+                        { gsMaze = newMaze
+                        , gsPos  = newPos
+                        }
         in printMaze newGS >>
 
         if Exit `notElem` concat newMaze
             then handleWin newGS
             else loop newGS
 
+-- Main function
 playGame :: Name -> Difficulty -> IO ()
 playGame name diff =
     hSetBuffering stdin NoBuffering >>      -- Disable buffering (Key read immediately)
@@ -193,11 +194,11 @@ playGame name diff =
     clearScreen >>
     getCurrentTime >>= \startTime ->
         let initialGS = GameState
-                { gsMaze = initialMaze
-                , gsName = name
-                , gsDiff = diff
+                { gsMaze      = initialMaze
+                , gsName      = name
+                , gsDiff      = diff
                 , gsStartTime = startTime
-                , gsPos = getPos Player initialMaze
+                , gsPos       = getPos Player initialMaze
                 }
         in
             printMaze initialGS >>

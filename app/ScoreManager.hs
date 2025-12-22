@@ -19,6 +19,7 @@ type Row     = [String]
 data Difficulty = Easy | Medium | Hard | Insane
                 deriving (Show, Read, Eq)
 
+-- Reverse default rankings
 instance Ord Difficulty where
     compare a b = compare (rank a) (rank b)
         where
@@ -39,6 +40,7 @@ instance Eq Score where
         timeTaken a  == timeTaken b &&
         difficulty a == difficulty b
 
+-- Sort by timeTaken, then by difficulty
 instance Ord Score where
     compare a b =
         compare (timeTaken a) (timeTaken b) <>
@@ -92,5 +94,4 @@ readScores file =
 
 -- Take top n scores
 topScores :: Int -> [Score] -> [Score]
-topScores n =
-    take n . sort
+topScores n = take n . sort
