@@ -159,7 +159,7 @@ handleWin gs =
         let time  = calcTimelapse (gsStartTime gs) endTime
             score = Score (gsName gs) (gsDiff gs) time
         in
-            putStrLn "You escaped!" >>
+            putStrLn (colorCode Green ++ "You escaped!" ++ colorCode Reset) >>
             putStrLn ("Time taken: " ++ show time ++ " seconds") >>
             writeScore scoresFile score
 
