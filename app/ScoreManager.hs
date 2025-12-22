@@ -7,7 +7,7 @@ module ScoreManager
 
 import System.Directory (doesFileExist)
 import Text.CSV (parseCSVFromFile, printCSV)
-import Data.List (sortOn)
+import Data.List (sortOn, sort)
 import Data.Maybe (mapMaybe)
 import Text.Read (readMaybe)
 
@@ -17,13 +17,23 @@ type Seconds = Double
 type Row     = [String]
 
 data Difficulty = Easy | Medium | Hard | Insane
-    deriving (Show, Read)
+                deriving (Show, Read, Eq, Ord)
 
 data Score = Score
     { playerName :: Name
     , difficulty :: Difficulty
     , timeTaken  :: Seconds
-    } deriving Show
+    } deriving (Show)
+
+instance Eq Score where
+    a == b =
+        timeTaken a  == timeTaken b &&
+        difficulty a == difficulty b
+
+instance Ord Score where
+    compare a b =
+        compare (timeTaken a) (timeTaken b) <>
+        compare (difficulty a) (difficulty b)
 
 -- Data types conversion
 scoreToRow :: Score -> Row
@@ -74,4 +84,4 @@ readScores file =
 -- Take top n scores
 topScores :: Int -> [Score] -> [Score]
 topScores n =
-    take n . sortOn timeTaken
+    take n . sort
