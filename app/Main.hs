@@ -64,10 +64,10 @@ promptN =
     putStrLn "How many top scores do you want?" >>
     getLine >>= \input ->
         case readMaybe input :: Maybe Int of
-            Just n  -> return n
-            Nothing ->
-                putStrLn "Invalid choice. Please enter an integer." >>
-                promptN
+            Just n | n > 0 -> return n
+            _              ->
+                            putStrLn "Invalid choice. Please enter an integer greater than 0." >>
+                            promptN
 
 -- Process menu selection
 process :: String -> IO ()
