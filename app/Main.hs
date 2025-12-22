@@ -20,7 +20,7 @@ intToDiff = \case
 menu :: IO ()
 menu = 
     putStrLn "\n================================" <>
-    putStrLn "|    Maze Game - Fog of War    |"   <>
+    putStrLn "|       Foggy Maze Game        |"   <>
     putStrLn "================================"   <>
     putStrLn "| 1. Play game                 |"   <>
     putStrLn "| 2. View top scores           |"   <>
