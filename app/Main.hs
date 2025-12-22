@@ -23,14 +23,14 @@ menu =
     putStrLn "|    Maze Game - Fog of War    |" <>
     putStrLn "================================" <>
     putStrLn "| 1. Play game                 |" <>
-    putStrLn "| 2. View top 5 scores         |" <>
+    putStrLn "| 2. View top scores           |" <>
     putStrLn "| 3. How to play?              |" <>
     putStrLn "| 4. Reset scores              |" <>
     putStrLn "| 5. Exit                      |" <>
     putStrLn "================================" <>
     putStrLn "Enter your choice: "
 
--- Prompt name
+-- Prompt inputs
 promptName :: IO Name
 promptName =
     putStrLn "Enter name: " >>
@@ -55,8 +55,19 @@ promptDiff =
             Just 2 -> return Medium
             Just 3 -> return Hard
             Just 4 -> return Insane
-            _      -> putStrLn "Invalid choice. Please enter 1, 2, 3 or 4." >>
-                        promptDiff
+            _      ->
+                putStrLn "Invalid choice. Please enter 1, 2, 3 or 4." >>
+                promptDiff
+
+promptN :: IO Int
+promptN =
+    putStrLn "How many top scores do you want?" >>
+    getLine >>= \input ->
+        case readMaybe input :: Maybe Int of
+            Just n  -> return n
+            Nothing ->
+                putStrLn "Invalid choice. Please enter an integer." >>
+                promptN
 
 -- Process menu selection
 process :: String -> IO ()
@@ -69,8 +80,9 @@ process choice = case choice of
 
     "2" ->
         readScores scoresFile >>= \scores ->
-            putStrLn "\n========= Top 5 Scores =========" >>
-            mapM_ print (topScores 5 scores) >>
+            promptN >>= \n ->
+                putStrLn ("\n========= Top " ++ show n ++ " Scores =========") >>
+                mapM_ print (topScores n scores) >>
         main
 
     "3" -> 
