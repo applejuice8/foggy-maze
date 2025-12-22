@@ -2,7 +2,7 @@
 
 module Game (playGame) where
 
-import System.IO
+import System.IO (hSetBuffering, hSetEcho, stdin, BufferMode(NoBuffering, LineBuffering))
 import Data.Char (toUpper)
 import System.Console.ANSI (clearScreen)
 import Data.Time.Clock (UTCTime, diffUTCTime, getCurrentTime)

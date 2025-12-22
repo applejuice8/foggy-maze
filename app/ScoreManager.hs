@@ -33,7 +33,7 @@ data Score = Score
     { playerName :: Name
     , difficulty :: Difficulty
     , timeTaken  :: Seconds
-    } deriving (Show)
+    } deriving Show
 
 instance Eq Score where
     a == b =
@@ -69,14 +69,14 @@ readCSV file =
                     Right rows -> return rows
                     Left _     -> return []
 
+-- Filter empty rows
+cleanRows :: [Row] -> [Row]
+cleanRows = filter $ not . isEmptyRow
+
 -- Check if a row is empty
 isEmptyRow :: Row -> Bool
 isEmptyRow []     = True
 isEmptyRow fields = all null fields
-
--- Filter empty rows
-cleanRows :: [Row] -> [Row]
-cleanRows = filter $ not . isEmptyRow
 
 -- Write scores to csv file
 writeScore :: FilePath -> Score -> IO ()
