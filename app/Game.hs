@@ -64,14 +64,15 @@ diffToSize = \case
     Hard   -> 2     -- 5x5 tiles
     Insane -> 1     -- 3x3 tiles
 
--- ANSI escape codes
 colorCode :: Color -> String
 colorCode = \case
-    Green  -> "\ESC[92m"
-    Yellow -> "\ESC[93m"
-    White  -> "\ESC[37m"
-    Gray   -> "\ESC[90m"
-    _      -> "\ESC[0m"
+        Green  -> ansi "92"
+        Yellow -> ansi "93"
+        White  -> ansi "37"
+        Gray   -> ansi "90"
+        _      -> ansi "0"
+    where
+        ansi code = "\ESC[" ++ code ++ "m"
 
 tileToColoredChar :: Tile -> ColoredChar
 tileToColoredChar = \case
