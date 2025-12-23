@@ -5,7 +5,7 @@ module Main where
 import Text.Read (readMaybe)
 import Config (scoresFile)
 import Game (playGame)
-import ScoreManager (Name, Difficulty(..), readScores, topScores)
+import ScoreManager (Name, Difficulty(..), readScores, topN)
 
 -- Data types conversion
 intToDiff :: Int -> Difficulty
@@ -82,7 +82,7 @@ process choice = case choice of
         readScores scoresFile >>= \scores ->
             promptN >>= \n ->
                 putStrLn ("\n========= Top " ++ show n ++ " Scores =========") >>
-                mapM_ print (topScores n scores) >>
+                mapM_ print (topN n scores) >>
         main
 
     "3" -> 

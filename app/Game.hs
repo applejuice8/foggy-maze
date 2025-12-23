@@ -15,7 +15,7 @@ type Pos         = (Int, Int)   -- (x, y)
 type ColoredChar = String
 
 data Tile = Wall | Exit | Player | Unknown | Empty
-            deriving (Eq)
+            deriving Eq
 
 data Color = Green | Yellow | White | Gray | Reset
 

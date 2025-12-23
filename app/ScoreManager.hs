@@ -2,7 +2,7 @@
 
 module ScoreManager
     ( Name, Difficulty(..), Score(..),
-    writeScore, readScores, topScores
+    writeScore, readScores, topN
     ) where
 
 import System.Directory (doesFileExist)
@@ -93,5 +93,5 @@ readScores file =
         return $ mapMaybe rowToScore rows
 
 -- Take top n scores
-topScores :: Int -> [Score] -> [Score]
-topScores n = take n . sort
+topN :: Ord a => Int -> [a] -> [a]
+topN n = take n . sort
