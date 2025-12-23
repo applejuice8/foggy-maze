@@ -19,6 +19,8 @@ data Tile = Wall | Exit | Player | Unknown | Empty
 
 data Color = Green | Yellow | White | Gray | Reset
 
+data Direction = UpDir | DownDir | LeftDir | RightDir
+
 data GameState = GameState
     { gsMaze      :: Maze
     , gsName      :: Name
@@ -26,6 +28,17 @@ data GameState = GameState
     , gsStartTime :: UTCTime
     , gsPos       :: Pos
     }
+
+-- Type class
+class Movable a where
+    move :: a -> Pos -> Pos
+
+instance Movable Direction where
+    move dir (y, x) = case dir of
+        UpDir    -> (y - 1, x)
+        DownDir  -> (y + 1, x)
+        LeftDir  -> (y, x - 1)
+        RightDir -> (y, x + 1)
 
 -- Data types conversion
 charToTile :: Char -> Tile
@@ -35,6 +48,14 @@ charToTile = \case
     'P' -> Player
     '?' -> Unknown
     _   -> Empty
+
+charToDirection :: Char -> Maybe Direction
+charToDirection = \case
+    'W' -> Just UpDir
+    'A' -> Just LeftDir
+    'S' -> Just DownDir
+    'D' -> Just RightDir
+    _   -> Nothing
 
 diffToSize :: Difficulty -> Int
 diffToSize = \case
@@ -99,15 +120,6 @@ printMaze gs =
         | (y, row) <- zip [0..] maze
         ]
 
--- Handle movement key presses
-handleMove :: Maze -> Char -> Maze
-handleMove maze key =
-    let oldPos = getPos Player maze
-        newPos = tryNewPos key oldPos
-    in if isValidPos maze newPos
-        then movePlayer oldPos newPos maze
-        else maze
-
 -- Get position of a tile in the maze
 getPos :: Tile -> Maze -> Pos
 getPos tile maze =
@@ -118,15 +130,20 @@ getPos tile maze =
         , t == tile
         ]
 
--- Top, Left, Bottom, Right
-tryNewPos :: Char -> Pos -> Pos
-tryNewPos key (y, x) = 
-    case toUpper key of
-        'W' -> (y - 1, x)
-        'A' -> (y, x - 1)
-        'S' -> (y + 1, x)
-        'D' -> (y, x + 1)
-        _   -> (y, x)
+-- Handle movement key presses
+handleMove :: GameState -> Char -> GameState
+handleMove gs key =
+    case charToDirection (toUpper key) of
+        Nothing -> gs
+        Just dir
+                | isValidPos maze newPos ->
+                    gs {gsMaze = newMaze, gsPos = newPos}
+                | otherwise -> gs
+            where
+                maze    = gsMaze gs
+                oldPos  = gsPos gs
+                newPos  = move dir oldPos
+                newMaze = movePlayer oldPos newPos maze
 
 -- Check if new position is a wall / exceeded
 isValidPos :: Maze -> Pos -> Bool
@@ -173,12 +190,8 @@ loop :: GameState -> IO ()
 loop gs =
     getChar >>= \key ->
         clearScreen >>
-        let newMaze = handleMove (gsMaze gs) key
-            newPos  = getPos Player newMaze
-            newGS   = gs
-                        { gsMaze = newMaze
-                        , gsPos  = newPos
-                        }
+        let newGS = handleMove gs key
+            newMaze = gsMaze newGS
         in printMaze newGS >>
 
         if Exit `notElem` concat newMaze
