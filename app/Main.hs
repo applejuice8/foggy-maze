@@ -86,11 +86,11 @@ process choice = case choice of
         main
 
     "3" -> 
-        putStrLn "\n========= How to Play? ========="    <>
-        putStrLn "- Find the exit (E) in the maze"       <>
-        putStrLn "- Use the WASD keys to move"           <>
-        putStrLn "- Can only see 5x5 area around player" <>
-        putStrLn "- Score is based on time taken"        <>
+        putStrLn "\n========= How to Play? ========="            <>
+        putStrLn "- Find the exit (E) in the maze"               <>
+        putStrLn "- Use the WASD keys to move"                   <>
+        putStrLn "- Can only see small area around player"       <>
+        putStrLn "- Score is based on time taken and difficulty" <>
         main
 
     "4" ->
