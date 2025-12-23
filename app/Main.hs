@@ -86,11 +86,14 @@ process choice = case choice of
         main
 
     "3" -> 
-        putStrLn "\n========= How to Play? ========="            <>
-        putStrLn "- Find the exit (E) in the maze"               <>
-        putStrLn "- Use the WASD keys to move"                   <>
-        putStrLn "- Can only see small area around player"       <>
-        putStrLn "- Score is based on time taken and difficulty" <>
+        putStrLn "\n=============== How to Play? ===============" <>
+        putStrLn "- Your location is denoted by P"                <>
+        putStrLn "- Hash symbols (#) are walls"                   <>
+        putStrLn "- Question marks (?) are fogs"                  <>
+        putStrLn "- Find the exit (E) in the maze"                <>
+        putStrLn "- Use the WASD keys to move"                    <>
+        putStrLn "- Can only see small area around player"        <>
+        putStrLn "- Score is based on time taken and difficulty"  <>
         main
 
     "4" ->
