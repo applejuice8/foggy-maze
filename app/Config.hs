@@ -1,4 +1,4 @@
-module Config (scoresFile) where
+module Config where
 
 scoresFile :: String
 scoresFile = "app/scores.csv"

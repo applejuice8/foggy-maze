@@ -5,16 +5,9 @@ module Main where
 import Text.Read (readMaybe)
 import Config (scoresFile)
 import Game (playGame)
-import ScoreManager (Name, Difficulty(..), readScores, topN)
-
--- Data types conversion
-intToDiff :: Int -> Difficulty
-intToDiff = \case
-    1 -> Easy
-    2 -> Medium
-    3 -> Hard
-    4 -> Insane
-    _ -> Easy   -- Default
+import ScoreManager (readScores, topN)
+import Types
+import Convert
 
 -- Show menu
 menu :: IO ()

@@ -2,88 +2,14 @@
 
 module Game (playGame) where
 
-import System.IO (hSetBuffering, hSetEcho, stdin, BufferMode(NoBuffering, LineBuffering))
+import System.IO (hSetBuffering, hSetEcho, stdin, BufferMode(..))
 import Data.Char (toUpper)
 import System.Console.ANSI (clearScreen)
 import Data.Time.Clock (UTCTime, diffUTCTime, getCurrentTime)
 import Config (scoresFile)
-import ScoreManager (Name, Difficulty(..), Score(..), writeScore)
-
--- Custom data types
-type Maze        = [[Tile]]
-type Pos         = (Int, Int)   -- (x, y)
-type ColoredChar = String
-
-data Tile = Wall | Exit | Player | Unknown | Empty
-            deriving Eq
-
-data Color = Green | Yellow | White | Gray | Reset
-
-data Direction = UpDir | DownDir | LeftDir | RightDir
-
-data GameState = GameState
-    { gsMaze      :: Maze
-    , gsName      :: Name
-    , gsDiff      :: Difficulty
-    , gsStartTime :: UTCTime
-    , gsPos       :: Pos
-    }
-
--- Type class
-class Movable a where
-    move :: a -> Pos -> Pos
-
-instance Movable Direction where
-    move dir (y, x) = case dir of
-        UpDir    -> (y - 1, x)
-        DownDir  -> (y + 1, x)
-        LeftDir  -> (y, x - 1)
-        RightDir -> (y, x + 1)
-
--- Data types conversion
-charToTile :: Char -> Tile
-charToTile = \case
-    '#' -> Wall
-    'E' -> Exit
-    'P' -> Player
-    '?' -> Unknown
-    _   -> Empty
-
-charToDirection :: Char -> Maybe Direction
-charToDirection = \case
-    'W' -> Just UpDir
-    'A' -> Just LeftDir
-    'S' -> Just DownDir
-    'D' -> Just RightDir
-    _   -> Nothing
-
-diffToSize :: Difficulty -> Int
-diffToSize = \case
-    Easy   -> 4     -- 9x9 tiles
-    Medium -> 3     -- 7x7 tiles
-    Hard   -> 2     -- 5x5 tiles
-    Insane -> 1     -- 3x3 tiles
-
--- ANSI escape codes
-colorCode :: Color -> String
-colorCode = \case
-        Green  -> ansi "92"
-        Yellow -> ansi "93"
-        White  -> ansi "37"
-        Gray   -> ansi "90"
-        _      -> ansi "0"
-    where
-        ansi code = "\ESC[" ++ code ++ "m"
-
-tileToColoredChar :: Tile -> ColoredChar
-tileToColoredChar = \case
-        Wall    -> color White  "#"
-        Exit    -> color Green  "E" 
-        Player  -> color Yellow "P"
-        Unknown -> color Gray   "?"
-        _       -> " "
-    where
-        color c s = colorCode c ++ s ++ colorCode Reset
+import Types
+import Convert
+import ScoreManager (writeScore)
 
 -- Maze template
 initialMaze :: Maze
