@@ -1,6 +1,6 @@
 {-# LANGUAGE LambdaCase #-}     -- For lambda case
 
-module ScoreManager (writeScore, readScores, topN) where
+module ScoreManager (writeScore, readScores, topNScores) where
 
 import System.Directory (doesFileExist)
 import Text.CSV (parseCSVFromFile, printCSV)
@@ -44,5 +44,5 @@ readScores file =
         return $ mapMaybe rowToScore rows
 
 -- Take top n scores
-topN :: Ord a => Int -> [a] -> [a]
-topN n = take n . sort
+topNScores :: Ord a => Int -> [a] -> [a]
+topNScores n = take n . sort

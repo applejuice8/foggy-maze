@@ -1,3 +1,5 @@
+{-# LANGUAGE LambdaCase #-}     -- For lambda case
+
 module Main where
 
 import Text.Read (readMaybe)
@@ -6,7 +8,7 @@ import Config (scoresFile)
 import Control.Monad (unless)
 import Types (Name, Difficulty(..), Score(..))
 import Game (startGame)
-import ScoreManager (readScores, topN)
+import ScoreManager (readScores, topNScores)
 
 -- Show menu
 menu :: IO ()
@@ -51,15 +53,15 @@ promptDiff =
                 putStrLn "Invalid choice. Please enter 1, 2, 3 or 4." >>
                 promptDiff
 
-promptN :: IO Int
-promptN =
+promptInt :: IO Int
+promptInt =
     putStrLn "How many top scores do you want?" >>
     getLine >>= \input ->
         case readMaybe input :: Maybe Int of
             Just n | n > 0 -> return n
             _              ->
                             putStrLn "Invalid choice. Please enter an integer greater than 0." >>
-                            promptN
+                            promptInt
 
 -- Format score
 formatScore :: (Int, Score) -> String
@@ -74,16 +76,16 @@ formatScore (i, score) =
 playGame :: IO ()
 playGame =
     promptName >>= \name ->
-        promptDiff >>= \diff ->
-            startGame name diff
+    promptDiff >>= \diff ->
+        startGame name diff
 
 -- Option 2 (View top scores)
 topScores :: IO ()
 topScores =
     readScores scoresFile >>= \scores ->
-    promptN >>= \n ->
+    promptInt >>= \n ->
         putStrLn ("\n========= Top " ++ show n ++ " Scores =========") >>
-        let scoreList = topN n scores
+        let scoreList = topNScores n scores
         in mapM_ (putStrLn . formatScore) (zip [1..] scoreList)
 
 -- Option 3 (How to play?)
@@ -111,7 +113,7 @@ resetScores =
 
 -- Process menu selection
 process :: String -> IO ()
-process choice = case choice of
+process = \case
     "1" -> playGame
     "2" -> topScores
     "3" -> instructions
