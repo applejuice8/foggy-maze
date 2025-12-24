@@ -64,6 +64,7 @@ diffToSize = \case
     Hard   -> 2     -- 5x5 tiles
     Insane -> 1     -- 3x3 tiles
 
+-- ANSI escape codes
 colorCode :: Color -> String
 colorCode = \case
         Green  -> ansi "92"
