@@ -3,6 +3,7 @@ module Main where
 import Text.Read (readMaybe)
 import Text.Printf (printf)
 import Config (scoresFile)
+import Control.Monad (unless)
 import Types (Name, Difficulty(..), Score(..))
 import Game (startGame)
 import ScoreManager (readScores, topN)
@@ -74,8 +75,7 @@ playGame :: IO ()
 playGame =
     promptName >>= \name ->
         promptDiff >>= \diff ->
-            startGame name diff >>
-    main
+            startGame name diff
 
 -- Option 2 (View top scores)
 topScores :: IO ()
@@ -84,12 +84,11 @@ topScores =
     promptN >>= \n ->
         putStrLn ("\n========= Top " ++ show n ++ " Scores =========") >>
         let scoreList = topN n scores
-        in mapM_ (putStrLn . formatScore) (zip [1..] scoreList) >>
-    main
+        in mapM_ (putStrLn . formatScore) (zip [1..] scoreList)
 
 -- Option 3 (How to play?)
-gameInstructions :: IO ()
-gameInstructions =
+instructions :: IO ()
+instructions =
     putStrLn "\n=============== How to Play? ===============" <>
     putStrLn "- Your location is denoted by P"                <>
     putStrLn "- Hash symbols (#) are walls"                   <>
@@ -97,37 +96,33 @@ gameInstructions =
     putStrLn "- Find the exit (E) in the maze"                <>
     putStrLn "- Use the WASD keys to move"                    <>
     putStrLn "- Can only see small area around player"        <>
-    putStrLn "- Score is based on time taken and difficulty"  <>
-    main
+    putStrLn "- Score is based on time taken and difficulty"
 
 -- Option 4 (Reset scores)
 resetScores :: IO ()
 resetScores =
     putStrLn "Are you sure? (y/n): " >>
     getLine >>= \confirm ->
-        (if confirm == "y"
+        if confirm == "y"
             then
                 writeFile scoresFile "" >>
                 putStrLn "Scores reset!"
             else putStrLn "Cancelled"
-        ) >>
-    main
 
 -- Process menu selection
 process :: String -> IO ()
 process choice = case choice of
     "1" -> playGame
     "2" -> topScores
-    "3" -> gameInstructions
+    "3" -> instructions
     "4" -> resetScores
     "5" -> putStrLn "Thanks for playing!"
-    _   ->
-        putStrLn "Invalid choice. Please try again." >>
-        main
+    _   -> putStrLn "Invalid choice. Please try again."
 
 -- Main function
 main :: IO ()
 main = 
     menu >>
     getLine >>= \choice ->
-        process choice
+        process choice >>
+        unless (choice == "5") main
