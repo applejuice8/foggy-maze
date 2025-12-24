@@ -1,8 +1,9 @@
 module Main where
 
 import Text.Read (readMaybe)
+import Text.Printf (printf)
 import Config (scoresFile)
-import Types (Name, Difficulty(..))
+import Types (Name, Difficulty(..), Score(..))
 import Game (startGame)
 import ScoreManager (readScores, topN)
 
@@ -59,7 +60,16 @@ promptN =
                             putStrLn "Invalid choice. Please enter an integer greater than 0." >>
                             promptN
 
--- Option 1
+-- Format score
+formatScore :: (Int, Score) -> String
+formatScore (i, score) = 
+    printf "%2d | %-10s | %-7s | %.2fs"
+        i
+        (playerName score)
+        (show $ difficulty score)
+        (timeTaken score)
+
+-- Option 1 (Play game)
 playGame :: IO ()
 playGame =
     promptName >>= \name ->
@@ -67,16 +77,17 @@ playGame =
             startGame name diff >>
     main
 
--- Option 2
+-- Option 2 (View top scores)
 topScores :: IO ()
 topScores =
     readScores scoresFile >>= \scores ->
-        promptN >>= \n ->
-            putStrLn ("\n========= Top " ++ show n ++ " Scores =========") >>
-            mapM_ print (topN n scores) >>
+    promptN >>= \n ->
+        putStrLn ("\n========= Top " ++ show n ++ " Scores =========") >>
+        let scoreList = topN n scores
+        in mapM_ (putStrLn . formatScore) (zip [1..] scoreList) >>
     main
 
--- Option 3
+-- Option 3 (How to play?)
 gameInstructions :: IO ()
 gameInstructions =
     putStrLn "\n=============== How to Play? ===============" <>
@@ -89,7 +100,7 @@ gameInstructions =
     putStrLn "- Score is based on time taken and difficulty"  <>
     main
 
--- Option 4
+-- Option 4 (Reset scores)
 resetScores :: IO ()
 resetScores =
     putStrLn "Are you sure? (y/n): " >>
