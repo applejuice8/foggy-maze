@@ -1,13 +1,10 @@
-{-# LANGUAGE LambdaCase #-}     -- For lambda case
-
 module Main where
 
 import Text.Read (readMaybe)
 import Config (scoresFile)
+import Types (Name, Difficulty(..))
 import Game (playGame)
 import ScoreManager (readScores, topN)
-import Types
-import Convert
 
 -- Show menu
 menu :: IO ()

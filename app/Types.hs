@@ -52,10 +52,11 @@ instance Ord Difficulty where
     compare a b = compare (rank a) (rank b)
         where
             rank :: Difficulty -> Int
-            rank Easy   = 4
-            rank Medium = 3
-            rank Hard   = 2
-            rank Insane = 1
+            rank diff = case diff of
+                Easy   -> 4
+                Medium -> 3
+                Hard   -> 2
+                Insane -> 1
 
 instance Eq Score where
     a == b =

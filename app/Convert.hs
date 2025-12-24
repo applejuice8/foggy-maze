@@ -2,18 +2,10 @@
 
 module Convert where
 
-import Types
 import Text.Read (readMaybe)
+import Types
 
--- Data types conversion
-intToDiff :: Int -> Difficulty
-intToDiff = \case
-    1 -> Easy
-    2 -> Medium
-    3 -> Hard
-    4 -> Insane
-    _ -> Easy
-
+-- Game.hs
 charToTile :: Char -> Tile
 charToTile = \case
     '#' -> Wall
@@ -57,6 +49,7 @@ tileToColoredChar = \case
     where
         color c s = colorCode c ++ s ++ colorCode Reset
 
+-- ScoreManager.hs
 scoreToRow :: Score -> Row
 scoreToRow (Score name diff time) =
     [name, show diff, show time]

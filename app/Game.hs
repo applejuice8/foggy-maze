@@ -1,5 +1,3 @@
-{-# LANGUAGE LambdaCase #-}     -- For lambda case
-
 module Game (playGame) where
 
 import System.IO (hSetBuffering, hSetEcho, stdin, BufferMode(..))

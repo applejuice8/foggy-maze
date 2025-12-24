@@ -6,9 +6,8 @@ import System.Directory (doesFileExist)
 import Text.CSV (parseCSVFromFile, printCSV)
 import Data.List (sort)
 import Data.Maybe (mapMaybe)
-import Text.Read (readMaybe)
-import Types
-import Convert
+import Types (Score(..), Row)
+import Convert (scoreToRow, rowToScore)
 
 -- Read csv file if exist
 readCSV :: FilePath -> IO [Row]
