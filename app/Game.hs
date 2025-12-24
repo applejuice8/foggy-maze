@@ -1,4 +1,4 @@
-module Game (playGame) where
+module Game (startGame) where
 
 import System.IO (hSetBuffering, hSetEcho, stdin, BufferMode(..))
 import Data.Char (toUpper)
@@ -125,8 +125,8 @@ loop gs =
             else loop newGS
 
 -- Main function
-playGame :: Name -> Difficulty -> IO ()
-playGame name diff =
+startGame :: Name -> Difficulty -> IO ()
+startGame name diff =
     hSetBuffering stdin NoBuffering >>      -- Disable buffering (Key read immediately)
     hSetEcho stdin False >>     -- Don't print key entered
 

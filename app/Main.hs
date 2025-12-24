@@ -3,7 +3,7 @@ module Main where
 import Text.Read (readMaybe)
 import Config (scoresFile)
 import Types (Name, Difficulty(..))
-import Game (playGame)
+import Game (startGame)
 import ScoreManager (readScores, topN)
 
 -- Show menu
@@ -59,46 +59,57 @@ promptN =
                             putStrLn "Invalid choice. Please enter an integer greater than 0." >>
                             promptN
 
+-- Option 1
+playGame :: IO ()
+playGame =
+    promptName >>= \name ->
+        promptDiff >>= \diff ->
+            startGame name diff >>
+    main
+
+-- Option 2
+topScores :: IO ()
+topScores =
+    readScores scoresFile >>= \scores ->
+        promptN >>= \n ->
+            putStrLn ("\n========= Top " ++ show n ++ " Scores =========") >>
+            mapM_ print (topN n scores) >>
+    main
+
+-- Option 3
+gameInstructions :: IO ()
+gameInstructions =
+    putStrLn "\n=============== How to Play? ===============" <>
+    putStrLn "- Your location is denoted by P"                <>
+    putStrLn "- Hash symbols (#) are walls"                   <>
+    putStrLn "- Question marks (?) are fogs"                  <>
+    putStrLn "- Find the exit (E) in the maze"                <>
+    putStrLn "- Use the WASD keys to move"                    <>
+    putStrLn "- Can only see small area around player"        <>
+    putStrLn "- Score is based on time taken and difficulty"  <>
+    main
+
+-- Option 4
+resetScores :: IO ()
+resetScores =
+    putStrLn "Are you sure? (y/n): " >>
+    getLine >>= \confirm ->
+        (if confirm == "y"
+            then
+                writeFile scoresFile "" >>
+                putStrLn "Scores reset!"
+            else putStrLn "Cancelled"
+        ) >>
+    main
+
 -- Process menu selection
 process :: String -> IO ()
 process choice = case choice of
-    "1" ->
-        promptName >>= \name ->
-        promptDiff >>= \diff ->
-            playGame name diff >>
-        main
-
-    "2" ->
-        readScores scoresFile >>= \scores ->
-            promptN >>= \n ->
-                putStrLn ("\n========= Top " ++ show n ++ " Scores =========") >>
-                mapM_ print (topN n scores) >>
-        main
-
-    "3" -> 
-        putStrLn "\n=============== How to Play? ===============" <>
-        putStrLn "- Your location is denoted by P"                <>
-        putStrLn "- Hash symbols (#) are walls"                   <>
-        putStrLn "- Question marks (?) are fogs"                  <>
-        putStrLn "- Find the exit (E) in the maze"                <>
-        putStrLn "- Use the WASD keys to move"                    <>
-        putStrLn "- Can only see small area around player"        <>
-        putStrLn "- Score is based on time taken and difficulty"  <>
-        main
-
-    "4" ->
-        putStrLn "Are you sure? (y/n): " >>
-        getLine >>= \confirm ->
-            (if confirm == "y"
-                then
-                    writeFile scoresFile "" >>
-                    putStrLn "Scores reset!"
-                else putStrLn "Cancelled"
-            ) >>
-        main
-
+    "1" -> playGame
+    "2" -> topScores
+    "3" -> gameInstructions
+    "4" -> resetScores
     "5" -> putStrLn "Thanks for playing!"
-
     _   ->
         putStrLn "Invalid choice. Please try again." >>
         main
