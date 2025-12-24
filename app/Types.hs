@@ -19,8 +19,8 @@ data Color      = Green | Yellow | White | Gray | Reset
 
 data Direction  = UpDir | DownDir | LeftDir | RightDir
 
-data Difficulty = Easy | Medium | Hard | Insane
-                deriving (Show, Read, Eq)
+data Difficulty = Insane | Hard | Medium | Easy
+                deriving (Show, Read, Eq, Ord)
 
 data GameState = GameState
     { gsMaze      :: Maze
@@ -47,16 +47,6 @@ instance Movable Direction where
         DownDir  -> (y + 1, x)
         LeftDir  -> (y, x - 1)
         RightDir -> (y, x + 1)
-
-instance Ord Difficulty where
-    compare a b = compare (rank a) (rank b)
-        where
-            rank :: Difficulty -> Int
-            rank diff = case diff of
-                Easy   -> 4
-                Medium -> 3
-                Hard   -> 2
-                Insane -> 1
 
 instance Eq Score where
     a == b =
