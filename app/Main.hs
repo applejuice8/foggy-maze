@@ -5,7 +5,7 @@ module Main where
 import Text.Read (readMaybe)
 import Text.Printf (printf)
 import Config (scoresFile)
-import Control.Monad (unless)
+import Control.Monad (when)
 import Types (Name, Difficulty(..), Score(..))
 import Game (startGame)
 import ScoreManager (readScores, topNScores)
@@ -127,4 +127,4 @@ main =
     menu >>
     getLine >>= \choice ->
         process choice >>
-        unless (choice == "5") main
+        when (choice /= "5") main
